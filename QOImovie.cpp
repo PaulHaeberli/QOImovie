@@ -83,29 +83,30 @@ void canvas_topng(canvas *in, const char *filename)
 //    QOImovie movie;
 //
 //   write a movie
-//        write(const char *outfilename)
-//        void putframe(canvas *c)
-//        void putframe(canvas *c)
-//        void putframe(canvas *c)
-//        void close()
+//        movie.write(const char *outfilename);
+//        movie.putframe(canvas *c);
+//        movie.putframe(canvas *c);
+//        movie.putframe(canvas *c);
+//        movie.close();
 //
 //   read a movie
-//        read(const char *infilename)
-//        canvas *getframe(int frameno);
-//        canvas *getframe(int frameno);
-//        canvas *getframe(int frameno);
-//        void close();
+//        movie.read(const char *infilename);
+//        canvas *c;
+//        c = getframe(int frameno);
+//        c = getframe(int frameno);
+//        c = getframe(int frameno);
+//        movie.close();
 //
 //   get info
-//        int getnframes()
+//        int moive.getnframes();
 //
 //   print
-//        read(const char *infilename)
-//        void print(const char *label)
-//        void close();
+//        movie.read(const char *infilename);
+//        movie.print(const char *label);
+//        movie.close();
 //
 //   benchmark
-//        readbenchmark(const char *filename)
+//        movie.readbenchmark(const char *filename)
 //
 //
 //    File looks like
