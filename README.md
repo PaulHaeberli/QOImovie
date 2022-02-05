@@ -3,27 +3,28 @@ Using the [QOI image format](https://github.com/phoboslab/qoi) to save sequences
 
 Only tested on M1 macOS, but it should work fine on all intel and arm machines.
 
-To make:
+To make the program QOImovie:
 
     % make
     
-The program 
 
-To convert a series of png files into a QOI movie.
+To convert a series of png files into a QOI movie:
 
     % ./QOImovie -toqoim 00.png 01.png 02.png test.qoim
 
-To read images from a QOI movie
+To read images from a QOI movie:
 
     % ./QOImovie -topng test.qoim outfamily
     
-To print a summary of a QOImovie
+To print a summary of a QOImovie:
     
     % ./QOImovie -print test.qoim
     
-To test:
+    
+To test everything:
 
-    # make test
+    # make testall
+    
 
 Should I make a c version too?
 
