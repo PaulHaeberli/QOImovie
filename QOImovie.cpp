@@ -117,16 +117,16 @@ canvas *qoireadframe(FILE *f, int offset, int size)
 //
 //   write a movie
 //        write(const char *outfilename)
-// 	  void putframe(canvas *c)
-// 	  void putframe(canvas *c)
-// 	  void putframe(canvas *c)
-// 	  void close()
+//        void putframe(canvas *c)
+//        void putframe(canvas *c)
+//        void putframe(canvas *c)
+//        void close()
 //
 //   read a movie
 //        read(const char *infilename)
-// 	  canvas *getframe(int frameno);
-// 	  canvas *getframe(int frameno);
-// 	  canvas *getframe(int frameno);
+//        canvas *getframe(int frameno);
+//        canvas *getframe(int frameno);
+//        canvas *getframe(int frameno);
 //        void close();
 //
 //   get info
@@ -138,14 +138,14 @@ canvas *qoireadframe(FILE *f, int offset, int size)
 //        void close();
 //
 //   benchmark
-// 	  readbenchmark(const char *filename)
+//        readbenchmark(const char *filename)
 //
 //
 //    QOImovie movie;
 //    movie.write("out.qoim");
 //    for(int i=0; i<20; i++) {
-//	  canvas *c = cannew(200,140);
-// 	  movie.putframe(c);
+//        canvas *c = cannew(200,140);
+//        movie.putframe(c);
 //    }
 //    fprintf(stderr, "nframes: %d\n", movie.getnframes());
 //    movie.close();
@@ -154,15 +154,15 @@ canvas *qoireadframe(FILE *f, int offset, int size)
 //    movie.read("out.qoim");
 //    fprintf(stderr, "nframes: %d\n", movie.getnframes());
 //    for(int i=0; i<movie.getnframes(); i++)
-// 	  canvas *c = movie.getframe(i);
-//	  canvas_free(c);
+//        canvas *c = movie.getframe(i);
+//        canvas_free(c);
 //    }
 //    movie.close();
 //
 //
 //    File looks like
 //
-//    int magic   	0x54FE
+//    int magic         0x54FE
 //    int nframes
 //    int duration
 //    int sizex
@@ -196,167 +196,167 @@ class QOImovie {
         init();
     }
     void init() {
-    	outf = 0;
+        outf = 0;
         inf = 0;
         magic = 0x54FE;
-	error = 0;
+        error = 0;
         sizex = -1;
-	sizey = -1;
-	duration = 0;
-	frametimes.clear();
-	frameoffsets.clear();
-	framesizes.clear();
+        sizey = -1;
+        duration = 0;
+        frametimes.clear();
+        frameoffsets.clear();
+        framesizes.clear();
     }
     void write(const char *filename) {
-	init();
-	outf = fopen(filename, "wb");
-	if(!outf) {
-	    fprintf(stderr, "QOImovie: can't open output file [%s]\n", filename);
-	    error = 1;
-	    return;
-	}
-        _writeint(0);	// bad magic for now
-        _writeint(0);	// nframes for now
-        _writeint(0);	// duration for now
+        init();
+        outf = fopen(filename, "wb");
+        if(!outf) {
+            fprintf(stderr, "QOImovie: can't open output file [%s]\n", filename);
+            error = 1;
+            return;
+        }
+        _writeint(0);   // bad magic for now
+        _writeint(0);   // nframes for now
+        _writeint(0);   // duration for now
     }
     void read(const char *filename) {
-	init();
-	inf = fopen(filename, "rb");
-	if(!inf) {
-	    fprintf(stderr, "QOImovie: can't open input file [%s]\n", filename);
-	    error = 1;
-	    return;
-	}
+        init();
+        inf = fopen(filename, "rb");
+        if(!inf) {
+            fprintf(stderr, "QOImovie: can't open input file [%s]\n", filename);
+            error = 1;
+            return;
+        }
         int val = _readint();
-	if(val != magic) {
-	    fprintf(stderr, "QOImovie: magic: 0x%x bad magic 0x%x\n", magic, val);
-	    error = 1;
-	    return;
-  	}
-	int nframes = _readint();
-	duration = _readint();
-	sizex = _readint();
-	sizey = _readint();
-	fseek(inf, -(3*nframes)*sizeof(int), SEEK_END);
-	for(int i=0; i<nframes; i++) {
-	    frametimes.push_back(_readint());
-	    frameoffsets.push_back(_readint());
-	    framesizes.push_back(_readint());
-	}
+        if(val != magic) {
+            fprintf(stderr, "QOImovie: magic: 0x%x bad magic 0x%x\n", magic, val);
+            error = 1;
+            return;
+        }
+        int nframes = _readint();
+        duration = _readint();
+        sizex = _readint();
+        sizey = _readint();
+        fseek(inf, -(3*nframes)*sizeof(int), SEEK_END);
+        for(int i=0; i<nframes; i++) {
+            frametimes.push_back(_readint());
+            frameoffsets.push_back(_readint());
+            framesizes.push_back(_readint());
+        }
     }
     void _writeint(int val) {
-	int bytes_write = fwrite(&val, 1, sizeof(int), outf);
-	if(bytes_write != sizeof(int)) {
-	    fprintf(stderr, "QOImovie: _writeint error\n");
-	    error = 1;
-	    return;
-	}
+        int bytes_write = fwrite(&val, 1, sizeof(int), outf);
+        if(bytes_write != sizeof(int)) {
+            fprintf(stderr, "QOImovie: _writeint error\n");
+            error = 1;
+            return;
+        }
     }
     int _readint() {
-	int val;
-	int bytes_read = fread(&val, 1, sizeof(int), inf);
-	if(bytes_read != sizeof(int)) {
-	    fprintf(stderr, "QOImovie: _readint error\n");
-	    error = 1;
-	    return 0;
-	}
-	return val;
+        int val;
+        int bytes_read = fread(&val, 1, sizeof(int), inf);
+        if(bytes_read != sizeof(int)) {
+            fprintf(stderr, "QOImovie: _readint error\n");
+            error = 1;
+            return 0;
+        }
+        return val;
     }
     int getnframes() {
-	return frameoffsets.size();
+        return frameoffsets.size();
     }
     canvas *getframe(int n) {
-	if(inf) {
-	    return qoireadframe(inf, frameoffsets[n], framesizes[n]);
-	} else {
-	    fprintf(stderr, "QOImovie: can not getframe from movie being written\n");
-	    error = 1;
-	    return 0;
-	}
+        if(inf) {
+            return qoireadframe(inf, frameoffsets[n], framesizes[n]);
+        } else {
+            fprintf(stderr, "QOImovie: can not getframe from movie being written\n");
+            error = 1;
+            return 0;
+        }
     }
     void putframe(canvas *c) {
-	if(outf) {
-	    int curframetime;
-	    if(getnframes() == 0) {
-		sizex = c->sizex;
-		sizey = c->sizey;
-		_writeint(sizex);
-		_writeint(sizey);
-		offset = 5*sizeof(int);
-		starttime = getusec();
-	        curframetime = 0;
-	    } else {
-		if((sizex != c->sizex) || (sizey != c->sizey)) {
-		    fprintf(stderr, "QOImovie: frames must be the same size\n");
-		    error = 1;
-		}
-	        curframetime = getusec()-starttime;
-	    }
-	    int size = qoiwriteframe(c, outf);
-	    frametimes.push_back(curframetime);
-	    frameoffsets.push_back(offset);
-	    framesizes.push_back(size);
-	    duration = curframetime;
-	    offset += size;
-	} else {
-	    fprintf(stderr, "QOImovie: can't put a frame while reading a movie\n");
-	    error = 1;
-	}
+        if(outf) {
+            int curframetime;
+            if(getnframes() == 0) {
+                sizex = c->sizex;
+                sizey = c->sizey;
+                _writeint(sizex);
+                _writeint(sizey);
+                offset = 5*sizeof(int);
+                starttime = getusec();
+                curframetime = 0;
+            } else {
+                if((sizex != c->sizex) || (sizey != c->sizey)) {
+                    fprintf(stderr, "QOImovie: frames must be the same size\n");
+                    error = 1;
+                }
+                curframetime = getusec()-starttime;
+            }
+            int size = qoiwriteframe(c, outf);
+            frametimes.push_back(curframetime);
+            frameoffsets.push_back(offset);
+            framesizes.push_back(size);
+            duration = curframetime;
+            offset += size;
+        } else {
+            fprintf(stderr, "QOImovie: can't put a frame while reading a movie\n");
+            error = 1;
+        }
     }
     void print(const char *label) {
-	fprintf(stderr, "\n");
-	fprintf(stderr, "QOImovie %s:\n", label);
-	fprintf(stderr, "    Size: %d x %d\n", sizex, sizey);
-	fprintf(stderr, "    N frames: %d\n", getnframes());
-	fprintf(stderr, "    Duration: %d usec\n", duration);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "QOImovie %s:\n", label);
+        fprintf(stderr, "    Size: %d x %d\n", sizex, sizey);
+        fprintf(stderr, "    N frames: %d\n", getnframes());
+        fprintf(stderr, "    Duration: %d usec\n", duration);
         for(int n=0; n<getnframes(); n++)
-	    fprintf(stderr, "    frame: %d  time: %d offset %d size %d\n", n, frametimes[n], frameoffsets[n], framesizes[n]);
-	fprintf(stderr, "\n");
+            fprintf(stderr, "    frame: %d  time: %d offset %d size %d\n", n, frametimes[n], frameoffsets[n], framesizes[n]);
+        fprintf(stderr, "\n");
     }
     int close() {
-	if(outf) {
+        if(outf) {
             int bytes_write;
-	    int nframes = getnframes();
-	    int inittime;
-	    for(int i=0; i<nframes; i++) {
-		_writeint(frametimes[i]);
-		_writeint(frameoffsets[i]);
+            int nframes = getnframes();
+            int inittime;
+            for(int i=0; i<nframes; i++) {
+                _writeint(frametimes[i]);
+                _writeint(frameoffsets[i]);
                 _writeint(framesizes[i]);
-	    }
-	    fseek(outf, 0, SEEK_SET);
-	    _writeint(magic);
-	    _writeint(nframes);
-	    _writeint(duration);
-	    _writeint(sizex);
-	    _writeint(sizey);
-	    fclose(outf);
-	} else {
-	    fclose(inf);
-	}
-	if(error)
-	    return 0;
-	else
-	    return 1;
+            }
+            fseek(outf, 0, SEEK_SET);
+            _writeint(magic);
+            _writeint(nframes);
+            _writeint(duration);
+            _writeint(sizex);
+            _writeint(sizey);
+            fclose(outf);
+        } else {
+            fclose(inf);
+        }
+        if(error)
+            return 0;
+        else
+            return 1;
     }
     void readbenchmark(const char *filename) {
-	int t0 = getusec();
+        int t0 = getusec();
         read(filename);
-	int nframes = getnframes();
-	for(int i=0; i<nframes; i++) {
-	    canvas *c = getframe(i);
-	    canvas_free(c);
-	}
-	close();
-	int t1 = getusec();
-	fprintf(stderr, "%d frames in %d usec\n", nframes, t1-t0);
+        int nframes = getnframes();
+        for(int i=0; i<nframes; i++) {
+            canvas *c = getframe(i);
+            canvas_free(c);
+        }
+        close();
+        int t1 = getusec();
+        fprintf(stderr, "%d frames in %d usec\n", nframes, t1-t0);
     }
     unsigned int getusec(void)
     {
-	struct timeval tv;
-	struct timezone tz;
-	gettimeofday(&tv, &tz);
-	int sec = (int)tv.tv_sec;
-	return (1000000*sec)+tv.tv_usec;
+        struct timeval tv;
+        struct timezone tz;
+        gettimeofday(&tv, &tz);
+        int sec = (int)tv.tv_sec;
+        return (1000000*sec)+tv.tv_usec;
     }
 };
 
@@ -372,29 +372,29 @@ int main(int argc, char **argv)
         exit(1);
     }
     if(strcmp(argv[1], "-toqoim") == 0) {
-	movie.write(argv[argc-1]);
-	for(int argp = 2; argp<argc-1; argp++) {
-	    canvas *c = canvas_frompng(argv[argp]);
-	    movie.putframe(c);
-	    canvas_free(c);
-	}
-	movie.close();
+        movie.write(argv[argc-1]);
+        for(int argp = 2; argp<argc-1; argp++) {
+            canvas *c = canvas_frompng(argv[argp]);
+            movie.putframe(c);
+            canvas_free(c);
+        }
+        movie.close();
     } else if(strcmp(argv[1], "-topng") == 0) {
-	movie.read(argv[2]);
-	for(int frameno = 0; frameno<movie.getnframes(); frameno++) {
-	    char outfname[1024];
-	    canvas *c = movie.getframe(frameno);
-	    sprintf(outfname, "%s%03d.png", argv[3], frameno);
-	    canvas_topng(c, outfname);
-	    canvas_free(c);
-	}
-	movie.close();
+        movie.read(argv[2]);
+        for(int frameno = 0; frameno<movie.getnframes(); frameno++) {
+            char outfname[1024];
+            canvas *c = movie.getframe(frameno);
+            sprintf(outfname, "%s%03d.png", argv[3], frameno);
+            canvas_topng(c, outfname);
+            canvas_free(c);
+        }
+        movie.close();
     } else if(strcmp(argv[1], "-print") == 0) {
-	movie.read(argv[2]);
-	movie.print("test");
-	movie.close();
+        movie.read(argv[2]);
+        movie.print("test");
+        movie.close();
     } else {
-	fprintf(stderr, "strange option [%s]\n", argv[1]);
+        fprintf(stderr, "strange option [%s]\n", argv[1]);
     }
     return 0;
 }
