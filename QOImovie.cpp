@@ -108,25 +108,6 @@ void canvas_topng(canvas *in, const char *filename)
 //        readbenchmark(const char *filename)
 //
 //
-//    QOImovie movie;
-//    movie.write("out.qoim");
-//    for(int i=0; i<20; i++) {
-//        canvas *c = cannew(200,140);
-//        movie.putframe(c);
-//    }
-//    fprintf(stderr, "nframes: %d\n", movie.getnframes());
-//    movie.close();
-//
-//    QOImovie movie;
-//    movie.read("out.qoim");
-//    fprintf(stderr, "nframes: %d\n", movie.getnframes());
-//    for(int i=0; i<movie.getnframes(); i++)
-//        canvas *c = movie.getframe(i);
-//        canvas_free(c);
-//    }
-//    movie.close();
-//
-//
 //    File looks like
 //
 //    int magic         0x54FE
