@@ -2,6 +2,9 @@
 all: QOImovie.cpp
 	c++ QOImovie.cpp -o QOImovie
 
+allc: QOImovie.c
+        cc QOImovie.c -o QOImovie
+
 clean:
 	rm -f QOImovie
 	rm -f out.qoim
