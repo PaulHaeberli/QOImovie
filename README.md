@@ -25,4 +25,6 @@ To test:
 
     # make test
 
+Should I make a c version too?
+
 Any suggestings welcome.
