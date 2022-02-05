@@ -8,7 +8,6 @@ clean:
 	-rm -f TEST*.png
 
 testall:
-        ./QOImovie -toqoim testimages/* out.qoim
-        ./QOImovie -print out.qoim
-        ./QOImovie -topng out.qoim TEST
-        ./QOImovie -readbenchmark out.qoim
+	./QOImovie -toqoim testimages/* out.qoim
+	./QOImovie -print out.qoim
+	./QOImovie -topng out.qoim TEST
