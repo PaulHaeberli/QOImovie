@@ -395,6 +395,7 @@ int main(int argc, char **argv)
         movie.close();
     } else {
         fprintf(stderr, "strange option [%s]\n", argv[1]);
+        exit(1);
     }
     return 0;
 }
