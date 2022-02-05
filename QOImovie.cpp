@@ -10,7 +10,7 @@
 #include "qoi.h"
 #include <vector>
 
-// start of support for running tests
+// support for canvas data structure
 
 #define SHIFT_R         (0)
 #define SHIFT_G         (8)
@@ -55,6 +55,8 @@ void canvas_free(canvas *c)
     free(c);
 }
 
+// support for reading and writing png images for testing
+
 canvas *canvas_frompng(const char *filename)
 {
     int sizex, sizey, n;
@@ -73,6 +75,8 @@ void canvas_topng(canvas *in, const char *filename)
 {
     stbi_write_png(filename, in->sizex, in->sizey, 4, in->data, 4*in->sizex);
 }
+
+// utilities to read and write qoi image frames
 
 int qoiwriteframe(canvas *c, FILE *f)
 {
@@ -110,9 +114,6 @@ canvas *qoireadframe(FILE *f, int offset, int size)
     int sizey = desc.height;
     return canvas_new_withdata(sizex, sizey, pixels);
 }
-
-// end of support for running tests
-
 
 // 
 //  QOImovie
