@@ -24,8 +24,6 @@ To print a summary of a QOImovie:
 To test everything:
 
     # make testall
-    
-
-Should I make a c version too?
+ 
 
 Any suggestings welcome.
