@@ -76,44 +76,6 @@ void canvas_topng(canvas *in, const char *filename)
     stbi_write_png(filename, in->sizex, in->sizey, 4, in->data, 4*in->sizex);
 }
 
-// utilities to read and write qoi image frames
-
-int qoiwriteframe(canvas *c, FILE *f)
-{
-    qoi_desc desc;
-    desc.width = (unsigned int)c->sizex;
-    desc.height = (unsigned int)c->sizey;
-    desc.channels = 4;
-    desc.colorspace = QOI_SRGB;
-    int size;
-    void *encoded = qoi_encode(c->data, &desc, &size);
-    if (!encoded) {
-        fclose(f);
-        return 0;
-    }
-    int bytes_write = fwrite(encoded, 1, size, f);
-    if(bytes_write != size) {
-        fprintf(stderr, "goiwriteframe error\n");
-        exit(1);
-    }
-    QOI_FREE(encoded);
-    return size;
-}
-
-canvas *qoireadframe(FILE *f, int offset, int size)
-{
-    qoi_desc desc;
-    fseek(f, offset, SEEK_SET);
-    void *data = QOI_MALLOC(size);
-    int bytes_read = fread(data, 1, size, f);
-    void *pixels = qoi_decode(data, bytes_read, &desc, 4);
-    QOI_FREE(data);
-
-    int channels = desc.channels;
-    int sizex = desc.width;
-    int sizey = desc.height;
-    return canvas_new_withdata(sizex, sizey, pixels);
-}
 
 // 
 //  QOImovie
@@ -362,6 +324,39 @@ class QOImovie {
         gettimeofday(&tv, &tz);
         int sec = (int)tv.tv_sec;
         return (1000000*sec)+tv.tv_usec;
+    }
+    static int qoiwriteframe(canvas *c, FILE *f) {
+        qoi_desc desc;
+        desc.width = (unsigned int)c->sizex;
+        desc.height = (unsigned int)c->sizey;
+        desc.channels = 4;
+        desc.colorspace = QOI_SRGB;
+        int size;
+        void *encoded = qoi_encode(c->data, &desc, &size);
+        if (!encoded) {
+            fclose(f);
+            return 0;
+        }
+        int bytes_write = fwrite(encoded, 1, size, f);
+        if(bytes_write != size) {
+            fprintf(stderr, "goiwriteframe error\n");
+            exit(1);
+        }
+        QOI_FREE(encoded);
+        return size;
+    }
+    static canvas *qoireadframe(FILE *f, int offset, int size) {
+        qoi_desc desc;
+        fseek(f, offset, SEEK_SET);
+        void *data = QOI_MALLOC(size);
+        int bytes_read = fread(data, 1, size, f);
+        void *pixels = qoi_decode(data, bytes_read, &desc, 4);
+        QOI_FREE(data);
+
+        int channels = desc.channels;
+        int sizex = desc.width;
+        int sizey = desc.height;
+        return canvas_new_withdata(sizex, sizey, pixels);
     }
 };
 
