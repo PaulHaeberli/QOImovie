@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 { 
     class QOImovie movie;
     if(argc<3) {
-        fprintf(stderr, "usage: QOImovie -toqoim 00.png 01.png 02.png test.qoim\n\n");
+        fprintf(stderr, "\nusage: QOImovie -toqoim 00.png 01.png 02.png test.qoim\n\n");
         fprintf(stderr, "usage: QOImovie -topng test.qoim outfamily\n\n");
         fprintf(stderr, "usage: QOImovie -print test.qoim\n\n");
         exit(1);
