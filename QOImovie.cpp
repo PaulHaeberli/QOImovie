@@ -10,6 +10,8 @@
 #include "qoi.h"
 #include <vector>
 
+// start of support for running tests
+
 #define SHIFT_R         (0)
 #define SHIFT_G         (8)
 #define SHIFT_B         (16)
@@ -108,6 +110,8 @@ canvas *qoireadframe(FILE *f, int offset, int size)
     int sizey = desc.height;
     return canvas_new_withdata(sizex, sizey, pixels);
 }
+
+// end of support for running tests
 
 
 // 
@@ -360,7 +364,7 @@ class QOImovie {
     }
 };
 
-// test 
+// test program follows
 
 int main(int argc, char **argv) 
 { 
