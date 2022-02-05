@@ -24,3 +24,5 @@ To print a summary of a QOImovie
 To test:
 
     # make test
+
+Any suggestings welcome.
