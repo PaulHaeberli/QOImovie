@@ -2,7 +2,9 @@
 
 This uses the [QOI image format](https://github.com/phoboslab/qoi) to save sequences of images
 
-Only tested on M1 macOS, but it should work fine on all intel and arm machines.
+Tested on M1 macOS, but it should work fine on all Intel and Raspberry PI machines or any other little-endian achitectures.
+
+If you have a good solution for handling big-endian machines, please let me know.
 
 To make the program qoimdemo:
 
@@ -26,5 +28,9 @@ To test everything:
 
     # make testall
  
+I'm thinking the could be a nice way to store animated icons and UI elements.
 
-Any suggestings welcome.
+Now considering adding multi-resolution support so the movie could be stored in any number of different sizes.
+
+All suggestings welcome.
+
