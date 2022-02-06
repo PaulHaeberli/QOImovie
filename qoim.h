@@ -208,8 +208,8 @@ static int _qoim_writeframe(qoim_canvas *c, FILE *f) {
     int size;
     void *encoded = qoi_encode(c->data, &desc, &size);
     if (!encoded) {
-        fclose(f);
-        return 0;
+        fprintf(stderr, "goiwriteframe encode error\n");
+        exit(1);
     }
     int bytes_write = fwrite(encoded, 1, size, f);
     if(bytes_write != size) {
@@ -471,8 +471,10 @@ int qoim_close(qoim *qm)
         _qoim_writeint(qm, qm->sizex);
         _qoim_writeint(qm, qm->sizey);
         fclose(qm->outf);
+        qm->outf = 0;
     } else {
         fclose(qm->inf);
+        qm->inf = 0;
     }
     if(qm->error)
         return 0;
