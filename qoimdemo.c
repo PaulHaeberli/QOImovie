@@ -33,10 +33,7 @@ qoim_canvas *qoim_canvas_frompng(const char *filename)
         fprintf(stderr, "qoim_canvas_frompng: error: problem reading %s\n", filename);
         exit(1);
     }
-    qoim_canvas *pic = qoim_canvas_new(sizex, sizey);
-    free(pic->data);
-    pic->data = (unsigned int *)data;
-    return pic;
+    return qoim_canvas_new_withdata(sizex, sizey, data);
 }
 
 void qoim_canvas_topng(qoim_canvas *in, const char *filename)
