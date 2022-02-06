@@ -314,8 +314,10 @@ class qoim {
             _writeint(sizex);
             _writeint(sizey);
             fclose(outf);
+            outf = 0;
         } else {
             fclose(inf);
+            inf = 0;
         }
         if(error)
             return 0;
@@ -352,8 +354,8 @@ class qoim {
         int size;
         void *encoded = qoi_encode(c->data, &desc, &size);
         if (!encoded) {
-            fclose(f);
-            return 0;
+            fprintf(stderr, "goiwriteframe encode error\n");
+            exit(1);
         }
         int bytes_write = fwrite(encoded, 1, size, f);
         if(bytes_write != size) {
