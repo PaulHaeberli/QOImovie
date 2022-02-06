@@ -1,4 +1,4 @@
-# QOImovie - Using QIO format to encode video
+# QOImovie - Using QOI format to encode video
 
 This uses the [QOI image format](https://github.com/phoboslab/qoi) to save sequences of images
 
