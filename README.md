@@ -4,22 +4,22 @@ This uses the [QOI image format](https://github.com/phoboslab/qoi) to save seque
 
 Only tested on M1 macOS, but it should work fine on all intel and arm machines.
 
-To make the program QOImovie:
+To make the program qoimdemo:
 
     % make
     
 
 To convert a series of png files into a QOI movie:
 
-    % ./QOImovie -toqoim 00.png 01.png 02.png test.qoim
+    % ./qoimdemo -toqoim 00.png 01.png 02.png test.qoim
 
 To read images from a QOI movie:
 
-    % ./QOImovie -topng test.qoim outfamily
+    % ./qoimdemo -topng test.qoim outfamily
     
 To print a summary of a QOImovie:
     
-    % ./QOImovie -print test.qoim
+    % ./qoimdemo -print test.qoim
     
     
 To test everything:
