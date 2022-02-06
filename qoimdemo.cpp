@@ -98,10 +98,7 @@ canvas *canvas_frompng(const char *filename)
         fprintf(stderr, "canvas_frompng: error: problem reading %s\n", filename);
         exit(1);
     }
-    canvas *pic = canvas_new(sizex, sizey);
-    free(pic->data);
-    pic->data = (unsigned int *)data;
-    return pic;
+    return canvas_new_withdata(sizex, sizey, data);
 }
 
 void canvas_topng(canvas *in, const char *filename)
