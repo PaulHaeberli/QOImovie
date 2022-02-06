@@ -1,5 +1,6 @@
-# QOImovie
-Using the [QOI image format](https://github.com/phoboslab/qoi) to save sequences of images
+# QOImovie Using QIO format to encode video
+
+This uses the [QOI image format](https://github.com/phoboslab/qoi) to save sequences of images
 
 Only tested on M1 macOS, but it should work fine on all intel and arm machines.
 
