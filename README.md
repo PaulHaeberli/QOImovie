@@ -25,7 +25,7 @@ To print a summary of a QOImovie:
     
 To concatenate several .qoim files:
     
-    % ./qoimcatin1.qoim in2.qoim in3.qoim out.qoim
+    % ./qoimcat in1.qoim in2.qoim in3.qoim out.qoim
     
   
 To test everything:
