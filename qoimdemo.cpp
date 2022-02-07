@@ -270,10 +270,6 @@ class qoim {
                 starttime = getusec();
                 curframetime = 0;
             } else {
-                if((sizex != c->sizex) || (sizey != c->sizey)) {
-                    fprintf(stderr, "qoim: frames must be the same size\n");
-                    error = 1;
-                }
                 curframetime = getusec()-starttime;
             }
             int size = qoiwriteframe(c, outf);
