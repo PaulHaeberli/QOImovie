@@ -23,14 +23,18 @@ To print a summary of a QOImovie:
     
     % ./qoimdemo -print test.qoim
     
+To concatenate several .qoim files:
     
+    % ./qoimcatin1.qoim in2.qoim in3.qoim out.qoim
+    
+  
 To test everything:
 
     # make testall
  
 I'm thinking this could be a nice way to store animated icons and UI elements.
 
-Now considering adding multi-resolution support so the movie could be stored in any number of different sizes.
+Adding multi-resolution support so the movie could be stored in any number of different sizes.
 
 WARNING: file format may be changing (a tiny bit) in the near future.
 
