@@ -2,9 +2,7 @@
 
 This uses the [QOI image format](https://github.com/phoboslab/qoi) to save sequences of images
 
-Tested on M1 macOS, but it should work fine on all Intel and Raspberry PI machines or any other little-endian achitectures.
-
-If you have a good solution for handling big-endian machines, please let me know.
+Tested on M1 macOS, should work fine on all Intel and Raspberry PI machines or any other little-endian achitectures.
 
 To make the program qoimdemo:
 
