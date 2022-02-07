@@ -1,6 +1,6 @@
 /*
 
-qoimcat - concatnate several .qoim movies
+qoimcat - concatenate several .qoim movies
 
 Paul Haeberli - https://twitter.com/GraficaObscura
 
