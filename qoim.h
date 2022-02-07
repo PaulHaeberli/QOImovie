@@ -424,10 +424,6 @@ void qoim_putframe(qoim *qm, qoim_canvas *c)
             qm->starttime = _qoim_getusec();
             curframetime = 0;
         } else {
-            if((qm->sizex != c->sizex) || (qm->sizey != c->sizey)) {
-                fprintf(stderr, "qoim: frames must be the same size\n");
-                qm->error = 1;
-            }
             curframetime = _qoim_getusec()-qm->starttime;
         }
         int size = _qoim_writeframe(c, qm->outf);
