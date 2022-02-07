@@ -32,5 +32,7 @@ I'm thinking this could be a nice way to store animated icons and UI elements.
 
 Now considering adding multi-resolution support so the movie could be stored in any number of different sizes.
 
+WARNING: file format may be changing in the near future.
+
 All suggestings welcome.
 
