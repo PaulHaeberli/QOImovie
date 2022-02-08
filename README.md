@@ -7,10 +7,10 @@ Tested on M1 macOS, but it should work fine most anywhere.
 
 write a movie
 
-   qoim *qm = qoim_open( "out.qoim", "w");
-       qoim_canvas *c = qoim_canvas_new(400, 300);
-      qoim_putframe(qm, c, usec);
-   qoim_close(qm);
+    qoim *qm = qoim_open( "out.qoim", "w");
+        qoim_canvas *c = qoim_canvas_new(400, 300);
+        qoim_putframe(qm, c, usec);
+    qoim_close(qm);
 
 write a movie in real time
 
