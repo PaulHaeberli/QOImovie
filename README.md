@@ -4,6 +4,38 @@ This uses the [QOI image format](https://github.com/phoboslab/qoi) to save seque
 
 Tested on M1 macOS, but it should work fine most anywhere.
 
+//
+//  write a movie
+//
+//    qoim *qm = qoim_open( "out.qoim", "w");
+//        qoim_canvas *c = qoim_canvas_new(400, 300);
+//        qoim_putframe(qm, c, usec);
+//    qoim_close(qm);
+//
+//  write a movie in real time
+//
+//    qoim *qm = qoim_open( "out.qoim", "w");
+//        qoim_canvas *c = qoim_canvas_new(400, 300);
+//        qoim_putframenow(qm, c);
+//    qoim_close(qm);
+//
+//  read a movie
+//
+//    qoim *qm = qoim_open( "out.qoim", "r");
+//    for(int frameno = 0; frameno<qoim_getnframes(qm); frameno++) {
+//        int usec;
+//        qoim_canvas *c = qoim_getframe(qm, frameno, &usec);
+//        qoim_canvas_free(c);
+//    }
+//    qoim_close(qm);
+//
+//  print
+//
+//    qoim *qm = qoim_open( "out.qoim", "r");
+//    qoim_print(qm, "test");
+//    qoim_close(qm);
+//
+
 To make the program qoimutil:
 
     % make
