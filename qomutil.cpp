@@ -41,27 +41,27 @@ Builds on top of Dominic Szablewski's QOI libary to store sequences of images.
 #include "stb_image_write.h"
 #define QOI_IMPLEMENTATION
 #include "qoi.h"
-#define QOIM_IMPLEMENTATION
-#include "qoim.h"
+#define QOM_IMPLEMENTATION
+#include "qom.h"
 #include <vector>
 
 // support for canvas data structure
 
 // 
-//  qoim
+//  qom
 // 
-//    qoim movie;
+//    qom movie;
 //
 //   write a movie
 //        movie.open(const char *outfilename, "w");
-//        movie.putframe(qoim_canvas *c, int usec);
-//        movie.putframe(qoim_canvas *c, int usec);
-//        movie.putframe(qoim_canvas *c, int usec);
+//        movie.putframe(gfx_canvas *c, int usec);
+//        movie.putframe(gfx_canvas *c, int usec);
+//        movie.putframe(gfx_canvas *c, int usec);
 //        movie.close();
 //
 //   read a movie
 //        movie.open(const char *infilename, "r");
-//        qoim_canvas *c;
+//        gfx_canvas *c;
 //        int usec;
 //        c = getframe(int frameno, &usec);
 //        c = getframe(int frameno, &usec);
@@ -112,7 +112,7 @@ Builds on top of Dominic Szablewski's QOI libary to store sequences of images.
 //
 class QOIm {
   public:
-    qoim *qm;
+    qom *qm;
 
     QOIm() {
         qm = 0;
@@ -122,55 +122,55 @@ class QOIm {
     }
     ~QOIm() {
         if(qm)
-            qoim_close(qm);
+            qom_close(qm);
     }
     void open(const char *filename, const char *mode) {
-        qm = qoim_open(filename, mode);
+        qm = qom_open(filename, mode);
         if(!qm)
             exit(1);
     }
     int getnframes() {
-        return qoim_getnframes(qm);
+        return qom_getnframes(qm);
     }
-    qoim_canvas *getframe(int frameno, int *usec) {
-        return qoim_getframe(qm, frameno, usec);
+    gfx_canvas *getframe(int frameno, int *usec) {
+        return qom_getframe(qm, frameno, usec);
     }
     int getduration() {
-        return qoim_getduration(qm);
+        return qom_getduration(qm);
     }
-    void putframe(qoim_canvas *c, int usec) {
-        qoim_putframe(qm, c, usec);
+    void putframe(gfx_canvas *c, int usec) {
+        qom_putframe(qm, c, usec);
     }
-    void putframenow(qoim_canvas *c) {
-        qoim_putframenow(qm, c);
+    void putframenow(gfx_canvas *c) {
+        qom_putframenow(qm, c);
     }
     void print(const char *label) {
-        qoim_print(qm, label);
+        qom_print(qm, label);
     }
     int close() {
-        int ret = qoim_close(qm);
+        int ret = qom_close(qm);
         qm = 0;
         return ret;
     }
     void readbenchmark(const char *filename) {
-        qoim_readbenchmark(filename);
+        qom_readbenchmark(filename);
     }
 };
 
 // test program follows
 
-qoim_canvas *qoim_canvas_frompng(const char *filename)
+gfx_canvas *gfx_canvas_frompng(const char *filename)
 {
     int sizex, sizey, n;
     unsigned char *data = stbi_load(filename, &sizex, &sizey, &n, 0);
     if(!data) {
-        fprintf(stderr, "qoim_canvas_frompng: error: problem reading %s\n", filename);
+        fprintf(stderr, "gfx_canvas_frompng: error: problem reading %s\n", filename);
         exit(1);
     }
-    return qoim_canvas_new_withdata(sizex, sizey, data);
+    return gfx_canvas_new_withdata(sizex, sizey, data);
 }
 
-void qoim_canvas_topng(qoim_canvas *in, const char *filename)
+void gfx_canvas_topng(gfx_canvas *in, const char *filename)
 {
     stbi_write_png(filename, in->sizex, in->sizey, 4, in->data, 4*in->sizex);
 }
@@ -181,18 +181,18 @@ int main(int argc, char **argv)
 { 
     class QOIm movie;
     if(argc<3) {
-        fprintf(stderr, "\nusage: qoimutil -toqoim 00.png 01.png 02.png test.qoim\n\n");
-        fprintf(stderr, "usage: qoimutil -topng test.qoim outfamily\n\n");
-        fprintf(stderr, "usage: qoimutil -print test.qoim\n\n");
+        fprintf(stderr, "\nusage: qomutil -toqom 00.png 01.png 02.png test.qom\n\n");
+        fprintf(stderr, "usage: qomutil -topng test.qom outfamily\n\n");
+        fprintf(stderr, "usage: qomutil -print test.qom\n\n");
         exit(1);
     }
-    if(strcmp(argv[1], "-toqoim") == 0) {
+    if(strcmp(argv[1], "-toqom") == 0) {
         int usec = 0;
         movie.open(argv[argc-1], "w");
         for(int argp = 2; argp<argc-1; argp++) {
-            qoim_canvas *c = qoim_canvas_frompng(argv[argp]);
+            gfx_canvas *c = gfx_canvas_frompng(argv[argp]);
             movie.putframe(c, usec);
-            qoim_canvas_free(c);
+            gfx_canvas_free(c);
             usec += DEFAULT_FRAMETIME;
         }
         movie.close();
@@ -201,10 +201,10 @@ int main(int argc, char **argv)
         for(int frameno = 0; frameno<movie.getnframes(); frameno++) {
             char outfname[1024];
             int usec;
-            qoim_canvas *c = movie.getframe(frameno, &usec);
+            gfx_canvas *c = movie.getframe(frameno, &usec);
             sprintf(outfname, "%s%03d.png", argv[3], frameno);
-            qoim_canvas_topng(c, outfname);
-            qoim_canvas_free(c);
+            gfx_canvas_topng(c, outfname);
+            gfx_canvas_free(c);
         }
         movie.close();
     } else if(strcmp(argv[1], "-print") == 0) {

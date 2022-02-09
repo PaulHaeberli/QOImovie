@@ -1,56 +1,56 @@
 
-all: qoimutil imgproc qoimcat
+all: qomutil imgproc qomcat
 
-qoimutil: qoimutil.c
-	cc qoimutil.c -o qoimutil
+qomutil: qomutil.c
+	cc qomutil.c -o qomutil
 
 imgproc: imgproc.c
 	cc imgproc.c -o imgproc
 
-qoimcat: qoimcat.c
-	cc qoimcat.c -o qoimcat
+qomcat: qomcat.c
+	cc qomcat.c -o qomcat
 
-allcpp: qoimutil.cpp
-	c++ qoimutil.cpp -o qoimutil
+allcpp: qomutil.cpp
+	c++ qomutil.cpp -o qomutil
 
 clean:
-	rm -f qoimutil imgproc qoimcat
+	rm -f qomutil imgproc qomcat
 	-rm -f tmp/*
 
 test:
-	./qoimutil -toqoim testimages/* tmp/out.qoim
-	./qoimutil -topng tmp/out.qoim tmp/TEST
-	./qoimutil -print tmp/out.qoim
-	./qoimutil -benchmark tmp/out.qoim
+	./qomutil -toqom testimages/* tmp/out.qom
+	./qomutil -topng tmp/out.qom tmp/TEST
+	./qomutil -print tmp/out.qom
+	./qomutil -benchmark tmp/out.qom
 
 pyramid:
-	./qoimutil -toqoim testimages/* tmp/level0.qoim
-	./imgproc tmp/level0.qoim tmp/level1.qoim zoom 0.5 0.5
-	./imgproc tmp/level1.qoim tmp/level2.qoim zoom 0.5 0.5
-	./imgproc tmp/level2.qoim tmp/level3.qoim zoom 0.5 0.5
-	./imgproc tmp/level3.qoim tmp/level4.qoim zoom 0.5 0.5
-	./imgproc tmp/level4.qoim tmp/level5.qoim zoom 0.5 0.5
-	./imgproc tmp/level5.qoim tmp/level6.qoim zoom 0.5 0.5
-	./imgproc tmp/level6.qoim tmp/level7.qoim zoom 0.5 0.5
-	./qoimutil -print tmp/level0.qoim
-	./qoimutil -print tmp/level1.qoim
-	./qoimutil -print tmp/level2.qoim
-	./qoimutil -print tmp/level3.qoim
-	./qoimutil -print tmp/level4.qoim
-	./qoimutil -print tmp/level5.qoim
-	./qoimutil -print tmp/level6.qoim
-	./qoimutil -print tmp/level7.qoim
-	./qoimcat tmp/level*.qoim tmp/pyramid.qoim
-	./qoimutil -print tmp/pyramid.qoim
+	./qomutil -toqom testimages/* tmp/level0.qom
+	./imgproc tmp/level0.qom tmp/level1.qom zoom 0.5 0.5
+	./imgproc tmp/level1.qom tmp/level2.qom zoom 0.5 0.5
+	./imgproc tmp/level2.qom tmp/level3.qom zoom 0.5 0.5
+	./imgproc tmp/level3.qom tmp/level4.qom zoom 0.5 0.5
+	./imgproc tmp/level4.qom tmp/level5.qom zoom 0.5 0.5
+	./imgproc tmp/level5.qom tmp/level6.qom zoom 0.5 0.5
+	./imgproc tmp/level6.qom tmp/level7.qom zoom 0.5 0.5
+	./qomutil -print tmp/level0.qom
+	./qomutil -print tmp/level1.qom
+	./qomutil -print tmp/level2.qom
+	./qomutil -print tmp/level3.qom
+	./qomutil -print tmp/level4.qom
+	./qomutil -print tmp/level5.qom
+	./qomutil -print tmp/level6.qom
+	./qomutil -print tmp/level7.qom
+	./qomcat tmp/level*.qom tmp/pyramid.qom
+	./qomutil -print tmp/pyramid.qom
 
 randseg:
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG00.qoim 5
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG01.qoim 5
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG02.qoim 5
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG03.qoim 5
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG04.qoim 5
-	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG05.qoim 5
-	./qoimutil -print tmp/RANDSEG05.qoim
-	./qoimcat tmp/RANDSEG*.qoim tmp/RAND.qoim
-	./qoimutil -print tmp/RAND.qoim
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG00.qom 5
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG01.qom 5
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG02.qom 5
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG03.qom 5
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG04.qom 5
+	./qomutil -randseg tmp/out.qom tmp/RANDSEG05.qom 5
+	./qomutil -print tmp/RANDSEG05.qom
+	./qomcat tmp/RANDSEG*.qom tmp/RAND.qom
+	./qomutil -print tmp/RAND.qom
 

@@ -1,6 +1,6 @@
 /*
 
-imgproc - process qoimmovie files
+imgproc - process qom movie files
 
 Paul Haeberli - https://twitter.com/GraficaObscura
 
@@ -38,8 +38,8 @@ SOFTWARE.
 #include "stb_image_resize.h"
 #define QOI_IMPLEMENTATION
 #include "qoi.h"
-#define QOIM_IMPLEMENTATION
-#include "qoim.h"
+#define QOM_IMPLEMENTATION
+#include "qom.h"
 #define IMGPROC_IMPLEMENTATION
 #include "imgproc.h"
 
@@ -58,9 +58,9 @@ SOFTWARE.
 #define FILT_ROUNDCORNERS       (12)
 #define FILT_SOFTEDGE           (13)
 
-/* qoimfilter */
+/* qomfilter */
 
-void qoimfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5) 
+void qomfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5) 
 {
     gfx_canvas *temp;
     switch(filtmode) {
@@ -134,7 +134,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float zoomx = atof(argv[i]);
             i++;
             float zoomy = atof(argv[i]);
-            qoimfilter(can_in, FILT_ZOOM, zoomx, zoomy, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_ZOOM, zoomx, zoomy, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"zoomtosize") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -144,7 +144,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             int sizex = atoi(argv[i]);
             i++;
             int sizey = atoi(argv[i]);
-            qoimfilter(can_in, FILT_ZOOM, sizex, sizey, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_ZOOM, sizex, sizey, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"saturate") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -152,7 +152,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float sat = atof(argv[i]);
-            qoimfilter(can_in, FILT_SATURATE, sat, NOARG, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_SATURATE, sat, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"sharpen") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -162,7 +162,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qoimfilter(can_in, FILT_SHARPEN, smalldiam, mag, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_SHARPEN, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"softfocus") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -172,7 +172,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qoimfilter(can_in, FILT_SOFTFOCUS, smalldiam, mag, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_SOFTFOCUS, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"enlighten") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -182,7 +182,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qoimfilter(can_in, FILT_ENLIGHTEN, smalldiam, mag, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_ENLIGHTEN, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"perhist") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -192,7 +192,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float min = atof(argv[i]);
             i++;
             float max = atof(argv[i]);
-            qoimfilter(can_in, FILT_PERHIST, min, max, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_PERHIST, min, max, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"expand") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -202,7 +202,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float min = atof(argv[i]);
             i++;
             float max = atof(argv[i]);
-            qoimfilter(can_in, FILT_EXPAND, min, max, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_EXPAND, min, max, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"gammawarp") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -210,7 +210,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float gamma = atof(argv[i]);
-            qoimfilter(can_in, FILT_GAMMAWARP, gamma, NOARG, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_GAMMAWARP, gamma, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"scalergb") == 0) {
             if((i+3) >= argc) { 
                 fprintf(stderr, "error: %s needs 3 arguments!\n", argv[i]);
@@ -222,7 +222,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float scaleg = atof(argv[i]);
             i++;
             float scaleb = atof(argv[i]);
-            qoimfilter(can_in, FILT_SCALERGB, scaler, scaleg, scaleb, NOARG, NOARG);
+            qomfilter(can_in, FILT_SCALERGB, scaler, scaleg, scaleb, NOARG, NOARG);
         } else if(strcmp(argv[i],"chromablur") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -230,7 +230,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float smalldiam = atof(argv[i]);
-            qoimfilter(can_in, FILT_CHROMABLUR, smalldiam, NOARG, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_CHROMABLUR, smalldiam, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"frame") == 0) {
             if((i+5) >= argc) { 
                 fprintf(stderr, "error: %s needs 5 arguments!\n", argv[i]);
@@ -247,7 +247,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float b = atof(argv[i]);
             i++;
             float a = atof(argv[i]);
-            qoimfilter(can_in, FILT_FRAME, width, r, g, b, a);
+            qomfilter(can_in, FILT_FRAME, width, r, g, b, a);
         } else if(strcmp(argv[i],"roundcorners") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -257,7 +257,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float radius = atof(argv[i])*gfx_canvas_diameter(can_in);
             i++;
             float exp = atof(argv[i]);
-            qoimfilter(can_in, FILT_ROUNDCORNERS, radius, exp, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_ROUNDCORNERS, radius, exp, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"softedge") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -265,7 +265,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float width = atof(argv[i])*gfx_canvas_diameter(can_in);
-            qoimfilter(can_in, FILT_SOFTEDGE, width, NOARG, NOARG, NOARG, NOARG);
+            qomfilter(can_in, FILT_SOFTEDGE, width, NOARG, NOARG, NOARG, NOARG);
         } else {
             fprintf(stderr,"imgproc: strange option [%s]\n",argv[i]);
             exit(1);
@@ -309,9 +309,9 @@ static int isqoifilename(const char *name)
     return 0;
 }
 
-static int isqoimfilename(const char *name)
+static int isqomfilename(const char *name)
 {
-    if(strendswith(name, ".qoim"))
+    if(strendswith(name, ".qom"))
         return 1;
     return 0;
 }
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"jpg  usage: imgproc in.jpg out.jpg\n");
         fprintf(stderr,"png  usage: imgproc in.png out.png\n");
         fprintf(stderr,"qoi  usage: imgproc in.qoi out.qoi\n");
-        fprintf(stderr,"qoim usage: imgproc in.qoim out.qoim\n");
+        fprintf(stderr,"qom usage: imgproc in.qom out.qom\n");
         fprintf(stderr,"\t[zoom xscale yscale]      zoom 1.5 1.5\n");
         fprintf(stderr,"\t[zoomtosize sizex sizey]  zoomtosize 640 480\n");
         fprintf(stderr,"\t[saturate sat]            saturate 1.5\n");
@@ -348,24 +348,24 @@ int main(int argc, char **argv)
         fprintf(stderr,"you can also process .qoi images like this:\n");
         fprintf(stderr,"\timgproc in.qoi out.qoi zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");
         fprintf(stderr,"\n");
-        fprintf(stderr,"you can also process .qoim movies like this:\n");
-        fprintf(stderr,"\timgproc in.qoim out.qoim zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");
+        fprintf(stderr,"you can also process .qom movies like this:\n");
+        fprintf(stderr,"\timgproc in.qom out.qom zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");
         fprintf(stderr,"\n");
         exit(1);
     }
 
-    if(isqoimfilename(argv[1]) && isqoimfilename(argv[2])) {
-        qoim *qm_in = qoim_open(argv[1], "r");
-        qoim *qm_out = qoim_open(argv[2], "w");
-        for(int frameno = 0; frameno<qoim_getnframes(qm_in); frameno++) {
+    if(isqomfilename(argv[1]) && isqomfilename(argv[2])) {
+        qom *qm_in = qom_open(argv[1], "r");
+        qom *qm_out = qom_open(argv[2], "w");
+        for(int frameno = 0; frameno<qom_getnframes(qm_in); frameno++) {
             int usec;
-            gfx_canvas *can_in = qoim_getframe(qm_in, frameno, &usec);
+            gfx_canvas *can_in = qom_getframe(qm_in, frameno, &usec);
             gfx_canvas *temp;
-            doprocess(can_in, argc, argv, frameno, qoim_getnframes(qm_in));
-            qoim_putframe(qm_out, can_in, usec);
+            doprocess(can_in, argc, argv, frameno, qom_getnframes(qm_in));
+            qom_putframe(qm_out, can_in, usec);
         }
-        qoim_close(qm_in);
-        qoim_close(qm_out);
+        qom_close(qm_in);
+        qom_close(qm_out);
     } else if(isjpegfilename(argv[1]) && isjpegfilename(argv[2])) {
         gfx_canvas *can_in = gfx_canvas_fromjpeg(argv[1]);
         doprocess(can_in, argc, argv, 0, 0);
@@ -381,7 +381,7 @@ int main(int argc, char **argv)
     } else {
         fprintf(stderr,"imgproc: strange file names\n");
         fprintf(stderr,"input and output files must be of the same type\n");
-        fprintf(stderr,".png and .qoim files are supported\n");
+        fprintf(stderr,".png and .qom files are supported\n");
         fprintf(stderr,"\n");
         fprintf(stderr,"\timgproc in.jpg out.jpg zoom 0.5 0.5 perhist 0.01 0.99 enlighten 20.0 0.7 saturate 1.2\n");
         fprintf(stderr,"\n");
@@ -389,7 +389,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"\n");
         fprintf(stderr,"\timgproc in.qoi out.qoi zoom 0.5 0.5 perhist 0.01 0.99 enlighten 20.0 0.7 saturate 1.2\n");
         fprintf(stderr,"\n");
-        fprintf(stderr,"\timgproc in.qoim out.qoim zoom 0.5 0.5 perhist 0.01 0.99 enlighten 20.0 0.7 saturate 1.2\n");
+        fprintf(stderr,"\timgproc in.qom out.qom zoom 0.5 0.5 perhist 0.01 0.99 enlighten 20.0 0.7 saturate 1.2\n");
         fprintf(stderr,"\n");
     }
     exit(0);

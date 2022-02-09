@@ -7,54 +7,54 @@ Tested on M1 macOS, but it should work fine most anywhere.
 
 write a movie
 
-    qoim *qm = qoim_open( "out.qoim", "w");
-        qoim_canvas *c = qoim_canvas_new(400, 300);
-        qoim_putframe(qm, c, usec);
-    qoim_close(qm);
+    qom *qm = qom_open( "out.qom", "w");
+        gfx_canvas *c = gfx_canvas_new(400, 300);
+        qom_putframe(qm, c, usec);
+    qom_close(qm);
 
 write a movie in real time
 
-    qoim *qm = qoim_open( "out.qoim", "w");
-    qoim_canvas *c = qoim_canvas_new(400, 300);
-        qoim_putframenow(qm, c);
-    qoim_close(qm);
+    qom *qm = qom_open( "out.qom", "w");
+    gfx_canvas *c = gfx_canvas_new(400, 300);
+        qom_putframenow(qm, c);
+    qom_close(qm);
 
 read a movie
 
-    qoim *qm = qoim_open( "out.qoim", "r");
-    for(int frameno = 0; frameno<qoim_getnframes(qm); frameno++) {
+    qom *qm = qom_open( "out.qom", "r");
+    for(int frameno = 0; frameno<qom_getnframes(qm); frameno++) {
         int usec;
-        qoim_canvas *c = qoim_getframe(qm, frameno, &usec);
-        qoim_canvas_free(c);
+        gfx_canvas *c = gfx_getframe(qm, frameno, &usec);
+        gfx_canvas_free(c);
     }
-    qoim_close(qm);
+    qom_close(qm);
 
 print
 
-    qoim *qm = qoim_open( "out.qoim", "r");
-    qoim_print(qm, "test");
-    qoim_close(qm);
+    qom *qm = qom_open( "out.qom", "r");
+    qom_print(qm, "test");
+    qom_close(qm);
 
-To make the program qoimutil:
+To make the program qomutil:
 
     % make
     
 
 To convert a series of png files into a QOI movie:
 
-    % ./qoimutil -toqoim 00.png 01.png 02.png test.qoim
+    % ./qomutil -toqom 00.png 01.png 02.png test.qom
 
 To read images from a QOI movie:
 
-    % ./qoimutil -topng test.qoim outfamily
+    % ./qomutil -topng test.qom outfamily
     
 To print a summary of a QOImovie:
     
-    % ./qoimutil -print test.qoim
+    % ./qomutil -print test.qom
     
-To concatenate several .qoim files:
+To concatenate several .qom files:
     
-    % ./qoimcat in1.qoim in2.qoim in3.qoim out.qoim
+    % ./qomcat in1.qom in2.qom in3.qom out.qom
     
   
 To test everything:

@@ -1,6 +1,6 @@
 /*
 
-qoimcat - concatenate several .qoim movies
+qomcat - concatenate several .qom movies
 
 Paul Haeberli - https://twitter.com/GraficaObscura
 
@@ -41,26 +41,26 @@ Builds on top of Dominic Szablewski's QOI libary to store sequences of images.
 #include "stb_image_write.h"
 #define QOI_IMPLEMENTATION
 #include "qoi.h"
-#define QOIM_IMPLEMENTATION
-#include "qoim.h"
+#define QOM_IMPLEMENTATION
+#include "qom.h"
 
 int main(int argc, char **argv) 
 { 
     if(argc<3) {
-        fprintf(stderr, "usage: qoimcat in1.qoim in2.qoim in3.qoim .... out.qoim\n");
+        fprintf(stderr, "usage: qom in1.qom in2.qom in3.qom .... out.qom\n");
         exit(1);
     }
-    qoim *qm_out = qoim_open(argv[argc-1], "w");
+    qom *qm_out = qom_open(argv[argc-1], "w");
     for(int argp = 1; argp<argc-1; argp++) {
-        qoim *qm_in = qoim_open(argv[argp], "r");
-        for(int frameno = 0; frameno < qoim_getnframes(qm_in); frameno++) {
+        qom *qm_in = qom_open(argv[argp], "r");
+        for(int frameno = 0; frameno < qom_getnframes(qm_in); frameno++) {
             int usec;
-            gfx_canvas *c = qoim_getframe(qm_in, frameno, &usec);
-            qoim_putframe(qm_out, c, usec);
+            gfx_canvas *c = qom_getframe(qm_in, frameno, &usec);
+            qom_putframe(qm_out, c, usec);
             gfx_canvas_free(c);
         }
-        qoim_close(qm_in);
+        qom_close(qm_in);
     }
-    qoim_close(qm_out);
+    qom_close(qm_out);
     return 0;
 }
