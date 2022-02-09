@@ -107,7 +107,7 @@ void gfx_canvas_expand(gfx_canvas *in, float min, float max);
 
 void gfx_canvas_perhist(gfx_canvas *c, float min, float max);
 
-void gfx_canvas_scalergb(gfx_canvas *in, float scaler, float scaleg, float scaleb);
+void gfx_canvas_scalergba(gfx_canvas *in, float scaler, float scaleg, float scaleb, float scalea);
 
 void gfx_canvas_noblack(gfx_canvas *c);
 
@@ -760,7 +760,7 @@ void gfx_canvas_perhist(gfx_canvas *c, float min, float max)
 
 /* scalergb */
 
-void gfx_canvas_scalergb(gfx_canvas *in, float scaler, float scaleg, float scaleb)
+void gfx_canvas_scalergba(gfx_canvas *in, float scaler, float scaleg, float scaleb, float scalea)
 {
     unsigned int *dptr = in->data;
     int n = in->sizex*in->sizey;
@@ -768,13 +768,15 @@ void gfx_canvas_scalergb(gfx_canvas *in, float scaler, float scaleg, float scale
         int r = round(RVAL(*dptr)*scaler);
         int g = round(GVAL(*dptr)*scaleg);
         int b = round(BVAL(*dptr)*scaleb);
-        int a = AVAL(*dptr);
+        int a = round(AVAL(*dptr)*scaleb);
         if(r>255) r = 255;
         if(g>255) g = 255;
         if(b>255) b = 255;
+        if(a>255) a = 255;
         if(r<0) r = 0;
         if(g<0) g = 0;
         if(b<0) b = 0;
+        if(a<0) a = 0;
         *dptr++ = CPACK(r, g, b, a);
     }
 }
@@ -962,11 +964,13 @@ gfx_Rect gfx_RectAspectInside(gfx_Rect r, float aspect)
 {
     float raspect = gfx_RectAspect(r);
     if(aspect>raspect) {
-	int sizey = r.sizex/aspect;
+	int sizey = round(r.sizex/aspect);
+	if(sizey==0) sizey++;
 	int orgy = (r.sizey-sizey)/2;
 	return gfx_RectMake(0, orgy, r.sizex, sizey);
     } else {
-	int sizex = r.sizey*aspect;
+	int sizex = round(r.sizey*aspect);
+	if(sizex==0) sizex++;
 	int orgx = (r.sizex-sizex)/2;
 	return gfx_RectMake(orgx, 0, sizex, r.sizey);
     }

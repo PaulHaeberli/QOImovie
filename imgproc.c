@@ -59,9 +59,12 @@ SOFTWARE.
 #define FILT_SOFTEDGE           (13)
 #define FILT_SETASPECT          (14)
 
-/* qomfilter */
+#define FILT_MOVIE_FADEINOUT    (15)
+#define FILT_MOVIE_BLURINOUT    (16)
 
-void qomfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5) 
+/* gfx_filter */
+
+void gfx_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5) 
 {
     gfx_canvas *temp;
     switch(filtmode) {
@@ -99,7 +102,7 @@ void qomfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float a
             gfx_canvas_gammawarp(can_in, arg1);
             break;
         case FILT_SCALERGB:
-            gfx_canvas_scalergb(can_in, arg1, arg2, arg3);
+            gfx_canvas_scalergba(can_in, arg1, arg2, arg3, 1.0);
             break;
         case FILT_CHROMABLUR:
             gfx_canvas_chromablur(can_in, arg1);
@@ -115,6 +118,41 @@ void qomfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float a
             break;
         case FILT_SETASPECT:
             gfx_canvas_set_aspect(can_in, arg1);
+            break;
+    }
+}
+
+float gfx_eerp(float f0, float f1, float p) {
+    if (f0==f1)
+	return f0;
+    if (p == 0.0)
+	return f0;
+    if (p == 1.0)
+	return f1;
+    return f0*pow(f1/f0, p);        // Faster  pow(f0, 1.0-p)*pow(f1, p) - Thanks for Tom Diff @TomDuff
+}
+
+void gfx_movie_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5, int frameno, int nframes) 
+{
+    gfx_canvas *temp;
+    float p, param, diam;
+    switch(filtmode) {
+        case FILT_MOVIE_FADEINOUT:
+	    p = frameno+0.5;
+	    param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
+	    if(param<1.0)
+		gfx_canvas_scalergba(can_in, param, param, param, param);
+            break;
+        case FILT_MOVIE_BLURINOUT:
+	    p = frameno+0.5;
+	    param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
+	    if(param<1.0) {
+		diam = gfx_canvas_diameter(can_in)*gfx_eerp(0.01, 1.0, param);
+		gfx_canvas *t = gfx_canvas_blur(can_in, diam);
+		gfx_canvas_swap(can_in, t);
+		gfx_canvas_free(t);
+		gfx_canvas_scalergba(can_in, param, param, param, param);
+	    }
             break;
     }
 }
@@ -138,7 +176,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float zoomx = atof(argv[i]);
             i++;
             float zoomy = atof(argv[i]);
-            qomfilter(can_in, FILT_ZOOM, zoomx, zoomy, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_ZOOM, zoomx, zoomy, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"zoomtosize") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -148,7 +186,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             int sizex = atoi(argv[i]);
             i++;
             int sizey = atoi(argv[i]);
-            qomfilter(can_in, FILT_ZOOM, sizex, sizey, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_ZOOM, sizex, sizey, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"saturate") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -156,7 +194,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float sat = atof(argv[i]);
-            qomfilter(can_in, FILT_SATURATE, sat, NOARG, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SATURATE, sat, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"sharpen") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -166,7 +204,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qomfilter(can_in, FILT_SHARPEN, smalldiam, mag, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SHARPEN, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"softfocus") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -176,7 +214,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qomfilter(can_in, FILT_SOFTFOCUS, smalldiam, mag, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SOFTFOCUS, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"enlighten") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -186,7 +224,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float smalldiam = atof(argv[i]);
             i++;
             float mag = atof(argv[i]);
-            qomfilter(can_in, FILT_ENLIGHTEN, smalldiam, mag, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_ENLIGHTEN, smalldiam, mag, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"perhist") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -196,7 +234,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float min = atof(argv[i]);
             i++;
             float max = atof(argv[i]);
-            qomfilter(can_in, FILT_PERHIST, min, max, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_PERHIST, min, max, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"expand") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -206,7 +244,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float min = atof(argv[i]);
             i++;
             float max = atof(argv[i]);
-            qomfilter(can_in, FILT_EXPAND, min, max, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_EXPAND, min, max, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"gammawarp") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -214,7 +252,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float gamma = atof(argv[i]);
-            qomfilter(can_in, FILT_GAMMAWARP, gamma, NOARG, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_GAMMAWARP, gamma, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"scalergb") == 0) {
             if((i+3) >= argc) { 
                 fprintf(stderr, "error: %s needs 3 arguments!\n", argv[i]);
@@ -226,7 +264,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float scaleg = atof(argv[i]);
             i++;
             float scaleb = atof(argv[i]);
-            qomfilter(can_in, FILT_SCALERGB, scaler, scaleg, scaleb, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SCALERGB, scaler, scaleg, scaleb, NOARG, NOARG);
         } else if(strcmp(argv[i],"chromablur") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -234,7 +272,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float smalldiam = atof(argv[i]);
-            qomfilter(can_in, FILT_CHROMABLUR, smalldiam, NOARG, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_CHROMABLUR, smalldiam, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"frame") == 0) {
             if((i+5) >= argc) { 
                 fprintf(stderr, "error: %s needs 5 arguments!\n", argv[i]);
@@ -251,7 +289,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float b = atof(argv[i]);
             i++;
             float a = atof(argv[i]);
-            qomfilter(can_in, FILT_FRAME, width, r, g, b, a);
+            gfx_filter(can_in, FILT_FRAME, width, r, g, b, a);
         } else if(strcmp(argv[i],"roundcorners") == 0) {
             if((i+2) >= argc) { 
                 fprintf(stderr, "error: %s needs 2 arguments!\n", argv[i]);
@@ -261,7 +299,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             float radius = atof(argv[i])*gfx_canvas_diameter(can_in);
             i++;
             float exp = atof(argv[i]);
-            qomfilter(can_in, FILT_ROUNDCORNERS, radius, exp, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_ROUNDCORNERS, radius, exp, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"softedge") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -269,7 +307,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float width = atof(argv[i])*gfx_canvas_diameter(can_in);
-            qomfilter(can_in, FILT_SOFTEDGE, width, NOARG, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SOFTEDGE, width, NOARG, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"setaspect") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -277,7 +315,23 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             float aspect = atof(argv[i]);
-            qomfilter(can_in, FILT_SETASPECT, aspect, NOARG, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_SETASPECT, aspect, NOARG, NOARG, NOARG, NOARG);
+        } else if(movie && (strcmp(argv[i],"fadeinout") == 0)) {
+            if((i+1) >= argc) { 
+                fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
+                    exit(1);
+            }
+            i++;
+            int fadeframes = atof(argv[i]);
+            gfx_movie_filter(can_in, FILT_MOVIE_FADEINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+        } else if(movie && (strcmp(argv[i],"blurinout") == 0)) {
+            if((i+1) >= argc) { 
+                fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
+                    exit(1);
+            }
+            i++;
+            int fadeframes = atof(argv[i]);
+            gfx_movie_filter(can_in, FILT_MOVIE_BLURINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
         } else {
             fprintf(stderr,"imgproc: strange option [%s]\n",argv[i]);
             exit(1);
@@ -351,6 +405,10 @@ int main(int argc, char **argv)
         fprintf(stderr,"\t[roundcorners radius exp] roundcorners 0.05 2.0\n");
         fprintf(stderr,"\t[softedge width]          softedge 0.05\n");
         fprintf(stderr,"\t[setaspect aspect]        setaspect 1.0\n");
+        fprintf(stderr,"\n");
+        fprintf(stderr,"for qom movie files this command can also be used:\n");
+        fprintf(stderr,"\t[fadeinout aspect]        fadeinout nframes\n");
+        fprintf(stderr,"\t[blurinout aspect]        blurinout nframes\n");
         fprintf(stderr,"\n");
         fprintf(stderr,"ops can be chained like this:\n");
         fprintf(stderr,"\timgproc in.jpg out.jpg zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");
