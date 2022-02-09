@@ -57,6 +57,7 @@ SOFTWARE.
 #define FILT_FRAME              (11)
 #define FILT_ROUNDCORNERS       (12)
 #define FILT_SOFTEDGE           (13)
+#define FILT_SETASPECT          (14)
 
 /* qomfilter */
 
@@ -111,6 +112,9 @@ void qomfilter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float a
             break;
         case FILT_SOFTEDGE:
             gfx_canvas_softedge(can_in, arg1);
+            break;
+        case FILT_SETASPECT:
+            gfx_canvas_set_aspect(can_in, arg1);
             break;
     }
 }
@@ -266,6 +270,14 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             i++;
             float width = atof(argv[i])*gfx_canvas_diameter(can_in);
             qomfilter(can_in, FILT_SOFTEDGE, width, NOARG, NOARG, NOARG, NOARG);
+        } else if(strcmp(argv[i],"setaspect") == 0) {
+            if((i+1) >= argc) { 
+                fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
+                    exit(1);
+            }
+            i++;
+            float aspect = atof(argv[i]);
+            qomfilter(can_in, FILT_SETASPECT, aspect, NOARG, NOARG, NOARG, NOARG);
         } else {
             fprintf(stderr,"imgproc: strange option [%s]\n",argv[i]);
             exit(1);
@@ -338,6 +350,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"\t[frame width r g b a]     frame 0.01 0.5 0.5 0.5 1.0\n");
         fprintf(stderr,"\t[roundcorners radius exp] roundcorners 0.05 2.0\n");
         fprintf(stderr,"\t[softedge width]          softedge 0.05\n");
+        fprintf(stderr,"\t[setaspect aspect]        setaspect 1.0\n");
         fprintf(stderr,"\n");
         fprintf(stderr,"ops can be chained like this:\n");
         fprintf(stderr,"\timgproc in.jpg out.jpg zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");

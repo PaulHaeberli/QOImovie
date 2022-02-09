@@ -180,6 +180,11 @@ int gfx_ilerplimit(int v0, int a0, int v1, int a1)
     return pix;
 }
 
+void gfx_canvas_print(gfx_canvas *c, const char *label)
+{
+    fprintf(stderr, "gfx_canvas %s: sizex: %d sizey: %d\n", label, c->sizex, c->sizey); 
+}
+
 gfx_canvas *gfx_canvas_fromqoi(const char *filename)
 {
     qoi_desc desc;
@@ -933,9 +938,38 @@ gfx_Rect gfx_RectInset(gfx_Rect r, int dist)
     return r;
 }
 
+float gfx_RectAspect(gfx_Rect r)
+{
+    return r.sizex/(float)r.sizey;
+}
+
+void gfx_RectPrint(gfx_Rect r, const char *label)
+{
+    fprintf(stderr, "gfx_Rect %s:  origin: %d %d  size: %d %d\n", label, r.originx, r.originy, r.sizex, r.sizey);
+}
+
 gfx_Rect gfx_canvas_Rect(gfx_canvas *c)
 {
     return gfx_RectMake(0, 0, c->sizex, c->sizey);
+}
+
+float gfx_canvas_aspect(gfx_canvas *c)
+{
+    return c->sizex/(float)c->sizey;
+}
+
+gfx_Rect gfx_RectAspectInside(gfx_Rect r, float aspect)
+{
+    float raspect = gfx_RectAspect(r);
+    if(aspect>raspect) {
+	int sizey = r.sizex/aspect;
+	int orgy = (r.sizey-sizey)/2;
+	return gfx_RectMake(0, orgy, r.sizex, sizey);
+    } else {
+	int sizex = r.sizey*aspect;
+	int orgx = (r.sizex-sizex)/2;
+	return gfx_RectMake(orgx, 0, sizex, r.sizey);
+    }
 }
 
 float gfx_RectDist(gfx_Rect r, float posx, float posy, float exp)
@@ -1086,6 +1120,30 @@ void gfx_canvas_softedge(gfx_canvas *c, float width)
     }
     free(wx);
     free(wy);
+}
+
+void gfx_canvas_copyto(gfx_canvas *src, gfx_Rect sr, gfx_canvas *dst)
+{
+    assert(sr.sizex == dst->sizex);
+    assert(sr.sizey == dst->sizey);
+    unsigned int *dptr = dst->data;
+    for(int y=0; y<sr.sizey; y++) {
+	unsigned int *sptr = src->data + (src->sizex*(y+sr.originy) + sr.originx);
+        for(int x=0; x<sr.sizex; x++)
+            *dptr++ = *sptr++;
+    }
+}
+
+void gfx_canvas_set_aspect(gfx_canvas *c, float aspect)
+{
+    gfx_canvas *out;
+    gfx_Rect r = gfx_RectAspectInside(gfx_canvas_Rect(c), aspect);
+    gfx_RectPrint(r, "ar");
+    out = gfx_canvas_new(r.sizex, r.sizey);
+    gfx_canvas_copyto(c, r, out);
+    gfx_canvas_swap(c, out);
+    gfx_canvas_print(c, "aspect");
+    gfx_canvas_free(out);
 }
 
 #endif /* IMGPROC_IMPLEMENTATION */
