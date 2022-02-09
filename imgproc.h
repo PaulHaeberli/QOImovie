@@ -409,11 +409,7 @@ void gfx_canvas_gammawarp(gfx_canvas *in, float gamma)
 
 void gfx_canvas_softfocus(gfx_canvas *in, float smalldiam, float blend)
 {
-    gfx_canvas *temp = gfx_canvas_clone(in);
-    gfx_canvas_gammawarp(temp, DEFGAMMA);
-    gfx_canvas *blur = gfx_canvas_blur(temp, smalldiam);
-    gfx_canvas_free(temp);
-    gfx_canvas_gammawarp(blur, DEFINVGAMMA);
+    gfx_canvas *blur = gfx_canvas_blur(in, smalldiam);
     gfx_canvas_mix(in, blur, blend);
     gfx_canvas_free(blur);
 }
