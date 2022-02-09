@@ -59,7 +59,7 @@ To concatenate several .qoim files:
   
 To test everything:
 
-    # make testall
+    # make test
  
 I'm thinking this could be a nice way to store animated icons and UI elements.
 

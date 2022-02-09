@@ -15,35 +15,42 @@ allcpp: qoimutil.cpp
 
 clean:
 	rm -f qoimutil imgproc qoimcat
-	-rm -f *.qoim
-	-rm -f TEST*.png
+	-rm -f tmp/*
+
+test:
+	./qoimutil -toqoim testimages/* tmp/out.qoim
+	./qoimutil -topng tmp/out.qoim tmp/TEST
+	./qoimutil -print tmp/out.qoim
+	./qoimutil -benchmark tmp/out.qoim
 
 pyramid:
-	./qoimutil -toqoim testimages/* level0.qoim
-	imgproc level0.qoim level1.qoim zoom 0.5 0.5
-	imgproc level1.qoim level2.qoim zoom 0.5 0.5
-	imgproc level2.qoim level3.qoim zoom 0.5 0.5
-	imgproc level3.qoim level4.qoim zoom 0.5 0.5
-	imgproc level4.qoim level5.qoim zoom 0.5 0.5
-	imgproc level5.qoim level6.qoim zoom 0.5 0.5
-	imgproc level6.qoim level7.qoim zoom 0.5 0.5
-	./qoimutil -print level0.qoim
-	./qoimutil -print level1.qoim
-	./qoimutil -print level2.qoim
-	./qoimutil -print level3.qoim
-	./qoimutil -print level4.qoim
-	./qoimutil -print level5.qoim
-	./qoimutil -print level6.qoim
-	./qoimutil -print level7.qoim
-	./qoimcat level*.qoim pyramid.qoim
-	./qoimutil -print pyramid.qoim
+	./qoimutil -toqoim testimages/* tmp/level0.qoim
+	./imgproc tmp/level0.qoim tmp/level1.qoim zoom 0.5 0.5
+	./imgproc tmp/level1.qoim tmp/level2.qoim zoom 0.5 0.5
+	./imgproc tmp/level2.qoim tmp/level3.qoim zoom 0.5 0.5
+	./imgproc tmp/level3.qoim tmp/level4.qoim zoom 0.5 0.5
+	./imgproc tmp/level4.qoim tmp/level5.qoim zoom 0.5 0.5
+	./imgproc tmp/level5.qoim tmp/level6.qoim zoom 0.5 0.5
+	./imgproc tmp/level6.qoim tmp/level7.qoim zoom 0.5 0.5
+	./qoimutil -print tmp/level0.qoim
+	./qoimutil -print tmp/level1.qoim
+	./qoimutil -print tmp/level2.qoim
+	./qoimutil -print tmp/level3.qoim
+	./qoimutil -print tmp/level4.qoim
+	./qoimutil -print tmp/level5.qoim
+	./qoimutil -print tmp/level6.qoim
+	./qoimutil -print tmp/level7.qoim
+	./qoimcat tmp/level*.qoim tmp/pyramid.qoim
+	./qoimutil -print tmp/pyramid.qoim
 
-testall:
-	./qoimutil -toqoim testimages/* out.qoim
-	./qoimutil -topng out.qoim TEST
-	./qoimutil -print out.qoim
-	./qoimutil -benchmark out.qoim
-
-later:
-	./qoimcat out.qoim out.qoim out.qoim 3.qoim
+randseg:
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG00.qoim 5
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG01.qoim 5
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG02.qoim 5
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG03.qoim 5
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG04.qoim 5
+	./qoimutil -randseg tmp/out.qoim tmp/RANDSEG05.qoim 5
+	./qoimutil -print tmp/RANDSEG05.qoim
+	./qoimcat tmp/RANDSEG*.qoim tmp/RAND.qoim
+	./qoimutil -print tmp/RAND.qoim
 

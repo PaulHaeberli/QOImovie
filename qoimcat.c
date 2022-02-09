@@ -55,9 +55,9 @@ int main(int argc, char **argv)
         qoim *qm_in = qoim_open(argv[argp], "r");
         for(int frameno = 0; frameno < qoim_getnframes(qm_in); frameno++) {
             int usec;
-            qoim_canvas *c = qoim_getframe(qm_in, frameno, &usec);
+            gfx_canvas *c = qoim_getframe(qm_in, frameno, &usec);
             qoim_putframe(qm_out, c, usec);
-            qoim_canvas_free(c);
+            gfx_canvas_free(c);
         }
         qoim_close(qm_in);
     }

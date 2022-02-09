@@ -43,14 +43,14 @@ Builds on top of Dominic Szablewski's QOI libary to store sequnces of images.
 //  write a movie
 //
 //    qoim *qm = qoim_open( "out.qoim", "w");
-//        qoim_canvas *c = qoim_canvas_new(400, 300);
+//        gfx_canvas *c = gfx_canvas_new(400, 300);
 //        qoim_putframe(qm, c, usec);
 //    qoim_close(qm);
 //
 //  write a movie in real time
 //
 //    qoim *qm = qoim_open( "out.qoim", "w");
-//        qoim_canvas *c = qoim_canvas_new(400, 300);
+//        gfx_canvas *c = gfx_canvas_new(400, 300);
 //        qoim_putframenow(qm, c);
 //    qoim_close(qm);
 //
@@ -59,8 +59,8 @@ Builds on top of Dominic Szablewski's QOI libary to store sequnces of images.
 //    qoim *qm = qoim_open( "out.qoim", "r");
 //    for(int frameno = 0; frameno<qoim_getnframes(qm); frameno++) {
 //        int usec;
-//        qoim_canvas *c = qoim_getframe(qm, frameno, &usec);
-//        qoim_canvas_free(c);
+//        gfx_canvas *c = qoim_getframe(qm, frameno, &usec);
+//        gfx_canvas_free(c);
 //    }
 //    qoim_close(qm);
 //
@@ -114,10 +114,10 @@ Header - Public functions */
 extern "C" {
 #endif
 
-typedef struct qoim_canvas {
+typedef struct gfx_canvas {
     unsigned int *data;
     int sizex, sizey;
-} qoim_canvas;
+} gfx_canvas;
 
 #define START_DIR_STILL (0)
 #define START_DIR_INC   (1)
@@ -161,14 +161,14 @@ typedef struct qoim {
     int framealloc;
 } qoim;
 
-qoim_canvas *qoim_canvas_new(int sizex, int sizey);
-qoim_canvas *qoim_canvas_new_withdata(int sizex, int sizey, void *data);
-void qoim_canvas_free(qoim_canvas *c);
+gfx_canvas *gfx_canvas_new(int sizex, int sizey);
+gfx_canvas *gfx_canvas_new_withdata(int sizex, int sizey, void *data);
+void gfx_canvas_free(gfx_canvas *c);
 
 qoim *qoim_open(const char *filename, const char *mode);
-void qoim_putframe(qoim *qm, qoim_canvas *c, int usec);
-void qoim_putframenow(qoim *qm, qoim_canvas *c);
-qoim_canvas *qoim_getframe(qoim *qm, int n, int *usec);
+void qoim_putframe(qoim *qm, gfx_canvas *c, int usec);
+void qoim_putframenow(qoim *qm, gfx_canvas *c);
+gfx_canvas *qoim_getframe(qoim *qm, int n, int *usec);
 int qoim_getduration(qoim *qm);
 int qoim_close(qoim *qm);
 
@@ -179,7 +179,7 @@ void qoim_readbenchmark(const char *filename);
 #ifdef __cplusplus
 }
 #endif
-#endif /* QOI_H */
+#endif /* QOIM_H */
 
 
 /* -----------------------------------------------------------------------------
@@ -196,25 +196,25 @@ Implementation */
 
 /* support for canvas data structure */
 
-qoim_canvas *qoim_canvas_new(int sizex, int sizey)
+gfx_canvas *gfx_canvas_new(int sizex, int sizey)
 {
-    qoim_canvas *c = (qoim_canvas *)malloc(sizeof(qoim_canvas));
+    gfx_canvas *c = (gfx_canvas *)malloc(sizeof(gfx_canvas));
     c->sizex = sizex;
     c->sizey = sizey;
     c->data = (unsigned int *)malloc(sizex*sizey*sizeof(unsigned int));
     return c;
 }
 
-qoim_canvas *qoim_canvas_new_withdata(int sizex, int sizey, void *data)
+gfx_canvas *gfx_canvas_new_withdata(int sizex, int sizey, void *data)
 {
-    qoim_canvas *c = (qoim_canvas *)malloc(sizeof(qoim_canvas));
+    gfx_canvas *c = (gfx_canvas *)malloc(sizeof(gfx_canvas));
     c->sizex = sizex;
     c->sizey = sizey;
     c->data = (unsigned int *)data;
     return c;
 }
 
-void qoim_canvas_free(qoim_canvas *c)
+void gfx_canvas_free(gfx_canvas *c)
 {
     if(!c)
         return;
@@ -233,7 +233,7 @@ static unsigned int _qoim_getusec(void)
     return (1000000*sec)+tv.tv_usec;
 }
 
-static int _qoim_writeframe(qoim_canvas *c, FILE *f) {
+static int _qoim_writeframe(gfx_canvas *c, FILE *f) {
     qoi_desc desc;
     desc.width = (unsigned int)c->sizex;
     desc.height = (unsigned int)c->sizey;
@@ -254,7 +254,7 @@ static int _qoim_writeframe(qoim_canvas *c, FILE *f) {
     return size;
 }
 
-static qoim_canvas *_qoim_readframe(FILE *f, int offset, int size) {
+static gfx_canvas *_qoim_readframe(FILE *f, int offset, int size) {
     qoi_desc desc;
     fseek(f, offset, SEEK_SET);
     void *data = malloc(size);
@@ -269,7 +269,7 @@ static qoim_canvas *_qoim_readframe(FILE *f, int offset, int size) {
     int channels = desc.channels;
     int sizex = desc.width;
     int sizey = desc.height;
-    return qoim_canvas_new_withdata(sizex, sizey, pixels);
+    return gfx_canvas_new_withdata(sizex, sizey, pixels);
 }
 
 static void _qoim_addframeinfo(qoim *qm, qoim_frameinfo *fi, int pos)
@@ -378,15 +378,16 @@ static void _qoim_writeheader(qoim *qm)
     _qoim_writeint(qm, qm->header.default_rightbounce);
 }
 
-static void _qoim_openwrite(qoim *qm, const char *filename) 
+static int _qoim_openwrite(qoim *qm, const char *filename) 
 {
     qm->outf = fopen(filename, "wb");
     if(!qm->outf) {
         fprintf(stderr, "qoim: can't open output file [%s]\n", filename);
         qm->error = 1;
-        return;
+        return 0;
     }
     _qoim_writeheader(qm);
+    return 1;
 }
 
 
@@ -418,22 +419,23 @@ static void _qoim_writeframeinfo(qoim *qm)
     }
 }
 
-static void _qoim_openread(qoim *qm, const char *filename) 
+static int _qoim_openread(qoim *qm, const char *filename) 
 {
     qm->inf = fopen(filename, "rb");
     if(!qm->inf) {
         fprintf(stderr, "qoim: can't open input file [%s]\n", filename);
         qm->error = 1;
-        return;
+        return 0;
     }
     _qoim_readheader(qm);
     if(qm->header.magic != QOIM_MAGIC) {
         fprintf(stderr, "qoim: good magic: 0x%x  bad magic 0x%x\n", QOIM_MAGIC, qm->header.magic);
         qm->error = 1;
-        return;
+        return 0;
     }
     fseek(qm->inf, -(qm->header.nframes*sizeof(qoim_frameinfo)), SEEK_END);
     _qoim_readframeinfo(qm);
+    return 1;
 }
 
 qoim *qoim_open(const char *filename, const char *mode)
@@ -456,9 +458,19 @@ qoim *qoim_open(const char *filename, const char *mode)
     qm->framealloc = 0;
 
     if(strcmp(mode, "r") == 0) {
-        _qoim_openread(qm, filename);
+        if(!_qoim_openread(qm, filename)) {
+           if(qm->inf)
+               fclose(qm->inf);
+            _qoim_free(qm);
+            return 0;
+        }
     } else if(strcmp(mode, "w") == 0) {
-        _qoim_openwrite(qm, filename);
+        if(!_qoim_openwrite(qm, filename)) {
+           if(qm->outf)
+               fclose(qm->outf);
+            _qoim_free(qm);
+            return 0;
+        }
     } else {
         fprintf(stderr, "qoim: strange mode for open [%s]\n", mode);
         _qoim_free(qm);
@@ -472,7 +484,7 @@ int qoim_getnframes(qoim *qm)
     return qm->header.nframes;
 }
 
-qoim_canvas *qoim_getframe(qoim *qm, int n, int *usec) 
+gfx_canvas *qoim_getframe(qoim *qm, int n, int *usec) 
 {
     if(qm->inf) {
         qoim_frameinfo *info = _qoim_getframeinfo(qm, n);
@@ -489,7 +501,7 @@ int qoim_getduration(qoim *qm)
     return qm->header.duration;
 }
 
-void qoim_putframe(qoim *qm, qoim_canvas *c, int usec) 
+void qoim_putframe(qoim *qm, gfx_canvas *c, int usec) 
 {
     if(qm->outf) {
         int curframetime;
@@ -519,7 +531,7 @@ void qoim_putframe(qoim *qm, qoim_canvas *c, int usec)
     }
 }
 
-void qoim_putframenow(qoim *qm, qoim_canvas *c) 
+void qoim_putframenow(qoim *qm, gfx_canvas *c) 
 {
     qoim_putframe(qm, c, _qoim_getusec()); 
 }
@@ -569,14 +581,16 @@ int qoim_close(qoim *qm)
 void qoim_readbenchmark(const char *filename) 
 {
     qoim *qm = qoim_open(filename, "r");
+    if(!qm)
+        exit(1);
     int t0 = _qoim_getusec();
     int nframes = qoim_getnframes(qm);
     int totpixels = 0;
     int totdata = 0;
     for(int i=0; i<nframes; i++) {
         int usec;
-        qoim_canvas *c = qoim_getframe(qm, i, &usec);
-        qoim_canvas_free(c);
+        gfx_canvas *c = qoim_getframe(qm, i, &usec);
+        gfx_canvas_free(c);
         qoim_frameinfo *fi = _qoim_getframeinfo(qm, i);
         totpixels += fi->sizex*fi->sizey;
         totdata += fi->size;

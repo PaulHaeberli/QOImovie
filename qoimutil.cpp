@@ -126,6 +126,8 @@ class QOIm {
     }
     void open(const char *filename, const char *mode) {
         qm = qoim_open(filename, mode);
+        if(!qm)
+            exit(1);
     }
     int getnframes() {
         return qoim_getnframes(qm);
