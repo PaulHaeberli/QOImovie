@@ -456,7 +456,6 @@ int main(int argc, char **argv)
             gfx_canvas *can_in = qom_getframe(qm_in, frameno, &usec);
             gfx_canvas *temp;
             doprocess(qm_out, can_in, argc, argv, frameno, qom_getnframes(qm_in));
-fprintf(stderr, "imgproc put %d usec\n", usec);
             qom_putframe(qm_out, can_in, usec);
         }
         qom_close(qm_in);
