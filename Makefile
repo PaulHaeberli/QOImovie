@@ -2,16 +2,16 @@
 all: qomutil imgproc qomcat
 
 qomutil: qomutil.c
-	cc qomutil.c -o qomutil
+	cc -O3 qomutil.c -o qomutil
 
 imgproc: imgproc.c
-	cc imgproc.c -o imgproc
+	cc -O3 imgproc.c -o imgproc
 
 qomcat: qomcat.c
-	cc qomcat.c -o qomcat
+	cc -O3 qomcat.c -o qomcat
 
 allcpp: qomutil.cpp
-	c++ qomutil.cpp -o qomutil
+	c++ -O3 qomutil.cpp -o qomutil
 
 clean:
 	rm -f qomutil imgproc qomcat
@@ -19,9 +19,22 @@ clean:
 
 test:
 	./qomutil -toqom testimages/* tmp/out.qom
-	./qomutil -topng tmp/out.qom tmp/TEST%04d.png
 	./qomutil -print tmp/out.qom
 	./qomutil -benchmark tmp/out.qom
+	./qomutil -topng tmp/out.qom tmp/TEST%04d.png
+
+print:
+	./qomutil -print tmp/lit.qom
+	./qomutil -benchmark tmp/lit.qom
+	./qomutil -print tmp/qoi.qom
+	./qomutil -benchmark tmp/qoi.qom
+	./qomutil -print tmp/png.qom
+	./qomutil -benchmark tmp/png.qom
+
+encoding:
+	./imgproc tmp/out.qom tmp/lit.qom LITERAL
+	./imgproc tmp/out.qom tmp/qoi.qom QOI
+	./imgproc tmp/out.qom tmp/png.qom PNG
 
 pyramid:
 	./qomutil -toqom testimages/* tmp/level0.qom

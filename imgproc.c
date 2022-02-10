@@ -62,6 +62,10 @@ SOFTWARE.
 #define FILT_MOVIE_FADEINOUT    (15)
 #define FILT_MOVIE_BLURINOUT    (16)
 
+#define FILT_MOVIE_ENCODE_LITERAL  	(17)
+#define FILT_MOVIE_ENCODE_QOI    	(18)
+#define FILT_MOVIE_ENCODE_PNG    	(19)
+
 /* gfx_filter */
 
 void gfx_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5) 
@@ -132,7 +136,7 @@ float gfx_eerp(float f0, float f1, float p) {
     return f0*pow(f1/f0, p);        // Faster  pow(f0, 1.0-p)*pow(f1, p) - Thanks for Tom Diff @TomDuff
 }
 
-void gfx_movie_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5, int frameno, int nframes) 
+void gfx_movie_filter(qom *qm, gfx_canvas *can_in, int filtmode, float arg1, float arg2, float arg3, float arg4, float arg5, int frameno, int nframes) 
 {
     gfx_canvas *temp;
     float p, param, diam;
@@ -154,12 +158,21 @@ void gfx_movie_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, 
 		gfx_canvas_scalergba(can_in, param, param, param, param);
 	    }
             break;
+	case FILT_MOVIE_ENCODE_LITERAL:
+	    qom_setoutputencoding(qm, qomENCODING_LITERAL);
+            break;
+	case FILT_MOVIE_ENCODE_QOI:
+	    qom_setoutputencoding(qm, qomENCODING_QOI);
+            break;
+	case FILT_MOVIE_ENCODE_PNG:
+	    qom_setoutputencoding(qm, qomENCODING_PNG);
+            break;
     }
 }
 
 #define NOARG   (0.0)
 
-void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nframes)
+void doprocess(qom *qm, gfx_canvas *can_in, int argc, char **argv, int frameno, int nframes)
 {
     int movie;
     if(nframes == 0)
@@ -316,6 +329,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             i++;
             float aspect = atof(argv[i]);
             gfx_filter(can_in, FILT_SETASPECT, aspect, NOARG, NOARG, NOARG, NOARG);
+
         } else if(movie && (strcmp(argv[i],"fadeinout") == 0)) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -323,7 +337,7 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             int fadeframes = atof(argv[i]);
-            gfx_movie_filter(can_in, FILT_MOVIE_FADEINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+            gfx_movie_filter(qm, can_in, FILT_MOVIE_FADEINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
         } else if(movie && (strcmp(argv[i],"blurinout") == 0)) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
@@ -331,7 +345,13 @@ void doprocess(gfx_canvas *can_in, int argc, char **argv, int frameno, int nfram
             }
             i++;
             int fadeframes = atof(argv[i]);
-            gfx_movie_filter(can_in, FILT_MOVIE_BLURINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+            gfx_movie_filter(qm, can_in, FILT_MOVIE_BLURINOUT, fadeframes, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+        } else if(movie && (strcmp(argv[i],"LITERAL") == 0)) {
+            gfx_movie_filter(qm, can_in, FILT_MOVIE_ENCODE_LITERAL, NOARG, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+        } else if(movie && (strcmp(argv[i],"QOI") == 0)) {
+            gfx_movie_filter(qm, can_in, FILT_MOVIE_ENCODE_QOI, NOARG, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
+        } else if(movie && (strcmp(argv[i],"PNG") == 0)) {
+            gfx_movie_filter(qm, can_in, FILT_MOVIE_ENCODE_PNG, NOARG, NOARG, NOARG, NOARG, NOARG, frameno, nframes);
         } else {
             fprintf(stderr,"imgproc: strange option [%s]\n",argv[i]);
             exit(1);
@@ -384,7 +404,7 @@ static int isqomfilename(const char *name)
 
 int main(int argc, char **argv)
 {
-    if(argc<5) {
+    if(argc<4) {
         fprintf(stderr,"\n");
         fprintf(stderr,"jpg  usage: imgproc in.jpg out.jpg\n");
         fprintf(stderr,"png  usage: imgproc in.png out.png\n");
@@ -409,6 +429,9 @@ int main(int argc, char **argv)
         fprintf(stderr,"for qom movie files this command can also be used:\n");
         fprintf(stderr,"\t[fadeinout aspect]        fadeinout nframes\n");
         fprintf(stderr,"\t[blurinout aspect]        blurinout nframes\n");
+        fprintf(stderr,"\t[qomLITERAL]        	    LITERAL\n");
+        fprintf(stderr,"\t[qomQOI]        	    QOI\n");
+        fprintf(stderr,"\t[qomPNG]        	    PNG\n");
         fprintf(stderr,"\n");
         fprintf(stderr,"ops can be chained like this:\n");
         fprintf(stderr,"\timgproc in.jpg out.jpg zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");
@@ -432,22 +455,23 @@ int main(int argc, char **argv)
             int usec;
             gfx_canvas *can_in = qom_getframe(qm_in, frameno, &usec);
             gfx_canvas *temp;
-            doprocess(can_in, argc, argv, frameno, qom_getnframes(qm_in));
+            doprocess(qm_out, can_in, argc, argv, frameno, qom_getnframes(qm_in));
+fprintf(stderr, "imgproc put %d usec\n", usec);
             qom_putframe(qm_out, can_in, usec);
         }
         qom_close(qm_in);
         qom_close(qm_out);
     } else if(isjpegfilename(argv[1]) && isjpegfilename(argv[2])) {
         gfx_canvas *can_in = gfx_canvas_fromjpeg(argv[1]);
-        doprocess(can_in, argc, argv, 0, 0);
+        doprocess(0, can_in, argc, argv, 0, 0);
         gfx_canvas_tojpeg(can_in, argv[2]);
     } else if(ispngfilename(argv[1]) && ispngfilename(argv[2])) {
         gfx_canvas *can_in = gfx_canvas_frompng(argv[1]);
-        doprocess(can_in, argc, argv, 0, 0);
+        doprocess(0, can_in, argc, argv, 0, 0);
         gfx_canvas_topng(can_in, argv[2]);
     } else if(isqoifilename(argv[1]) && isqoifilename(argv[2])) {
         gfx_canvas *can_in = gfx_canvas_fromqoi(argv[1]);
-        doprocess(can_in, argc, argv, 0, 0);
+        doprocess(0, can_in, argc, argv, 0, 0);
         gfx_canvas_toqoi(can_in, argv[2]);
     } else {
         fprintf(stderr,"imgproc: strange file names\n");
