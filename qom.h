@@ -636,9 +636,8 @@ void qom_putframe(qom *qm, gfx_canvas *c, int usec)
             qm->header.sizey = c->sizey;
             qm->offset = sizeof(qom_header);
             qm->starttime = usec;
-            curframetime = 0;
         }
-	curframetime = usec;
+	curframetime = usec-qm->starttime;
 	int size;
 	switch(qm->output_encoding) {
 	    case qomENCODING_LITERAL:

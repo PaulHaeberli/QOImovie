@@ -1138,11 +1138,9 @@ void gfx_canvas_set_aspect(gfx_canvas *c, float aspect)
 {
     gfx_canvas *out;
     gfx_Rect r = gfx_RectAspectInside(gfx_canvas_Rect(c), aspect);
-    gfx_RectPrint(r, "ar");
     out = gfx_canvas_new(r.sizex, r.sizey);
     gfx_canvas_copyto(c, r, out);
     gfx_canvas_swap(c, out);
-    gfx_canvas_print(c, "aspect");
     gfx_canvas_free(out);
 }
 

@@ -202,7 +202,7 @@ int main(int argc, char **argv)
             char outfname[1024];
             int usec;
             gfx_canvas *c = movie.getframe(frameno, &usec);
-	    sprintf(outfname, argv[3], frameno);
+	    sprintf(outfname, "%s%04d.png", argv[3], frameno);
             gfx_canvas_topng(c, outfname);
             gfx_canvas_free(c);
         }

@@ -2,16 +2,16 @@
 all: qomutil imgproc qomcat
 
 qomutil: qomutil.c
-	cc -O3 qomutil.c -o qomutil
+	cc qomutil.c -o qomutil
 
 imgproc: imgproc.c
-	cc -O3 imgproc.c -o imgproc
+	cc imgproc.c -o imgproc
 
 qomcat: qomcat.c
-	cc -O3 qomcat.c -o qomcat
+	cc qomcat.c -o qomcat
 
 allcpp: qomutil.cpp
-	c++ -O3 qomutil.cpp -o qomutil
+	c++ qomutil.cpp -o qomutil
 
 clean:
 	rm -f qomutil imgproc qomcat
@@ -21,7 +21,7 @@ test:
 	./qomutil -toqom testimages/* tmp/out.qom
 	./qomutil -print tmp/out.qom
 	./qomutil -benchmark tmp/out.qom
-	./qomutil -topng tmp/out.qom tmp/TEST%04d.png
+	./qomutil -topng tmp/out.qom tmp/TEST
 
 print:
 	./qomutil -print tmp/lit.qom
