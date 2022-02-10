@@ -127,6 +127,15 @@ typedef struct gfx_canvas {
 #define BOUNCE_REV      (1)
 #define BOUNCE_CYCLE    (2)
 
+#define ERROR_NONE			(0)
+#define ERROR_OPEN_READ			(1)
+#define ERROR_OPEN_WRITE		(2)
+#define ERROR_WRITE			(3)
+#define ERROR_READ			(4)
+#define ERROR_MAGIC			(5)
+#define ERROR_PUTFRAME_WHILE_READ	(6)
+#define ERROR_GETFRAME_WHILE_WRITE	(7)
+
 typedef struct qom_header {
     int magic;    
     int nframes;
@@ -329,7 +338,7 @@ static void _qom_writeint(qom *qm, int val)
     if(bytes_write != sizeof(int)) {
         fprintf(stderr, "qom: _qom_writeint error\n");
 	exit(1);
-        qm->error = 1;
+        qm->error = ERROR_WRITE;
         return;
     }
 }
@@ -341,7 +350,7 @@ static int _qom_readint(qom *qm)
     if(bytes_read != sizeof(int)) {
         fprintf(stderr, "qom: _qom_readint error\n");
 	exit(1);
-        qm->error = 1;
+        qm->error = ERROR_READ;
         return 0;
     }
     int p = 0;
@@ -391,7 +400,7 @@ static int _qom_openwrite(qom *qm, const char *filename)
     qm->mode = MODE_W;
     if(!qm->f) {
         fprintf(stderr, "qom: can't open output file [%s]\n", filename);
-        qm->error = 1;
+        qm->error = ERROR_OPEN_WRITE;
         return 0;
     }
     _qom_writeheader(qm);
@@ -433,13 +442,13 @@ static int _qom_openread(qom *qm, const char *filename)
     qm->mode = MODE_R;
     if(!qm->f) {
         fprintf(stderr, "qom: can't open input file [%s]\n", filename);
-        qm->error = 1;
+        qm->error = ERROR_OPEN_READ;
         return 0;
     }
     _qom_readheader(qm);
     if(qm->header.magic != QOM_MAGIC) {
         fprintf(stderr, "qom: good magic: 0x%x  bad magic 0x%x\n", QOM_MAGIC, qm->header.magic);
-        qm->error = 1;
+        qm->error = ERROR_MAGIC;
         return 0;
     }
     fseek(qm->f, -(qm->header.nframes*sizeof(qom_frameinfo)), SEEK_END);
@@ -461,7 +470,7 @@ qom *qom_open(const char *filename, const char *mode)
     qm->header.default_rightbounce = BOUNCE_REV;
     qm->mode = MODE_NONE;
     qm->f = 0;
-    qm->error = 0;
+    qm->error = ERROR_NONE;
     qm->starttime = 0;
     qm->frames = 0;
     qm->framealloc = 0;
@@ -500,7 +509,7 @@ gfx_canvas *qom_getframe(qom *qm, int n, int *usec)
         return _qom_readframe(qm->f, info->offset, info->size);
     } else {
         fprintf(stderr, "qom: can't getframe from movie being written\n");
-        qm->error = 1;
+        qm->error = ERROR_GETFRAME_WHILE_WRITE;
         return 0;
     }
 }
@@ -536,7 +545,7 @@ void qom_putframe(qom *qm, gfx_canvas *c, int usec)
         qm->offset += size;
     } else {
         fprintf(stderr, "qom: can't put a frame while reading a movie\n");
-        qm->error = 1;
+        qm->error = ERROR_PUTFRAME_WHILE_READ;
     }
 }
 
@@ -584,6 +593,11 @@ int qom_close(qom *qm)
     int error = qm->error;
     _qom_free(qm);
     return error;
+}
+
+int qom_geterror(qom *qm)
+{
+    return qm->error;
 }
 
 void qom_setstarttime(qom *qm, int usec)
