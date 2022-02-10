@@ -453,7 +453,7 @@ int main(int argc, char **argv)
         qom *qm_in = qom_open(argv[1], "r");
         qom *qm_out = qom_open(argv[2], "w");
         for(int frameno = 0; frameno<qom_getnframes(qm_in); frameno++) {
-            int usec;
+            double usec;
             gfx_canvas *can_in = qom_getframe(qm_in, frameno, &usec);
             gfx_canvas *temp;
             doprocess(qm_out, can_in, argc, argv, frameno, qom_getnframes(qm_in));

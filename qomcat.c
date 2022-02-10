@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     for(int argp = 1; argp<argc-1; argp++) {
         qom *qm_in = qom_open(argv[argp], "r");
         for(int frameno = 0; frameno < qom_getnframes(qm_in); frameno++) {
-            int usec;
+            double usec;
             gfx_canvas *c = qom_getframe(qm_in, frameno, &usec);
             qom_putframe(qm_out, c, usec);
             gfx_canvas_free(c);

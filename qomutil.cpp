@@ -54,15 +54,15 @@ Builds on top of Dominic Szablewski's QOI libary to store sequences of images.
 //
 //   write a movie
 //        movie.open(const char *outfilename, "w");
-//        movie.putframe(gfx_canvas *c, int usec);
-//        movie.putframe(gfx_canvas *c, int usec);
-//        movie.putframe(gfx_canvas *c, int usec);
+//        movie.putframe(gfx_canvas *c, double usec);
+//        movie.putframe(gfx_canvas *c, double usec);
+//        movie.putframe(gfx_canvas *c, double usec);
 //        movie.close();
 //
 //   read a movie
 //        movie.open(const char *infilename, "r");
 //        gfx_canvas *c;
-//        int usec;
+//        double usec;
 //        c = getframe(int frameno, &usec);
 //        c = getframe(int frameno, &usec);
 //        c = getframe(int frameno, &usec);
@@ -132,13 +132,13 @@ class QOIm {
     int getnframes() {
         return qom_getnframes(qm);
     }
-    gfx_canvas *getframe(int frameno, int *usec) {
+    gfx_canvas *getframe(int frameno, double *usec) {
         return qom_getframe(qm, frameno, usec);
     }
     int getduration() {
         return qom_getduration(qm);
     }
-    void putframe(gfx_canvas *c, int usec) {
+    void putframe(gfx_canvas *c, double usec) {
         qom_putframe(qm, c, usec);
     }
     void putframenow(gfx_canvas *c) {
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
         exit(1);
     }
     if(strcmp(argv[1], "-toqom") == 0) {
-        int usec = 0;
+        double usec = 0;
         movie.open(argv[argc-1], "w");
         for(int argp = 2; argp<argc-1; argp++) {
             gfx_canvas *c = gfx_canvas_frompng(argv[argp]);
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
         movie.open(argv[2], "r");
         for(int frameno = 0; frameno<movie.getnframes(); frameno++) {
             char outfname[1024];
-            int usec;
+            double usec;
             gfx_canvas *c = movie.getframe(frameno, &usec);
 	    sprintf(outfname, "%s%04d.png", argv[3], frameno);
             gfx_canvas_topng(c, outfname);

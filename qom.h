@@ -58,7 +58,7 @@ Builds on top of Dominic Szablewski's QOI libary to store sequnces of images.
 //
 //    qom *qm = qom_open( "out.qom", "r");
 //    for(int frameno = 0; frameno<qom_getnframes(qm); frameno++) {
-//        int usec;
+//        double usec;
 //        gfx_canvas *c = qom_getframe(qm, frameno, &usec);
 //        gfx_canvas_free(c);
 //    }
@@ -75,10 +75,12 @@ Builds on top of Dominic Szablewski's QOI libary to store sequnces of images.
 //
 //    int magic;                        header
 //    int nframes;
-//    int duration;
+//    unsigned int duration_lo;
+//    unsigned int duration_hi;
 //    int sizex;
 //    int sizey;
-//    int default_starttime; 
+//    unsigned int default_starttime_lo; 
+//    unsigned int default_starttime_hi; 
 //    int default_startdir; 
 //    int default_leftbounce;
 //    int default_rightbounce;
@@ -90,26 +92,32 @@ Builds on top of Dominic Szablewski's QOI libary to store sequnces of images.
 //    int frameencoding3;
 //    QOI frame3
 //
-//    int time;                 frameinfo1
-//    int frameencoding;
+//    unsigned int time_lo;              frameinfo1
+//    unsigned int time_hi;           
+//    int encoding;
 //    int sizex;
 //    int sizey;
 //    int offset;
 //    int size;
+//    int encoding_usec;
 //
-//    int time;                 frameinfo1
-//    int frameencoding;
+//    unsigned int time_lo;              frameinfo2
+//    unsigned int time_hi;           
+//    int encoding;
 //    int sizex;
 //    int sizey;
 //    int offset;
 //    int size;
+//    int encoding_usec;
 //
-//    int time;                 frameinfo2
-//    int frameencoding;
+//    unsigned int time_lo;              frameinfo3
+//    unsigned int time_hi;           
+//    int encoding;
 //    int sizex;
 //    int sizey;
 //    int offset;
 //    int size;
+//    int encoding_usec;
 //
 
 */
@@ -153,24 +161,28 @@ typedef struct gfx_canvas {
 #define qomERROR_FORMAT			(8)
 
 typedef struct qom_header {
-    int magic;    
-    int nframes;
-    int duration;
-    int sizex;                  /* first frame */
-    int sizey;                  /* fisrt frame */
-    int default_starttime;      /* usec */
-    int default_startdir;       /* still left right */
-    int default_leftbounce;     /* stop rev cycle */
-    int default_rightbounce;    /* stop rec cycle */
+    int magic;    			/* magic number */
+    int nframes;			/* nframes */
+    unsigned int duration_lo;		/* total duration */
+    unsigned int duration_hi;
+    int sizex;                  	/* first frame */
+    int sizey;                  	/* fisrt frame */
+    unsigned int default_starttime_lo;  /* usec */
+    unsigned int default_starttime_hi;  /* usec */
+    int default_startdir;       	/* still left right */
+    int default_leftbounce;     	/* stop rev cycle */
+    int default_rightbounce;    	/* stop rec cycle */
 } qom_header;
 
 typedef struct qom_frameinfo {
-    int time;
-    int encoding;
-    int sizex;
-    int sizey;
-    int offset;
-    int size;
+    unsigned int time_lo;		/* timestamp of the frame */
+    unsigned int time_hi;
+    int encoding;			/* encoding method */
+    int sizex;				/* image width */
+    int sizey;				/* image height */
+    int offset;				/* file offset of the frame data */
+    int size;				/* size of the frame data */
+    int encoding_usec;			/* the time used to encode and write the data */
 } qom_frameinfo;
 
 #define QIOM_HEADER_SIZE        (sizeof(qom_header))
@@ -187,7 +199,7 @@ typedef struct qom {
     FILE *f;
     int error;
     int offset;
-    int starttime;
+    double firstframe_usec;
     int output_encoding;
     qom_frameinfo *frames;
     int framealloc;
@@ -198,10 +210,10 @@ gfx_canvas *gfx_canvas_new_withdata(int sizex, int sizey, void *data);
 void gfx_canvas_free(gfx_canvas *c);
 
 qom *qom_open(const char *filename, const char *mode);
-void qom_putframe(qom *qm, gfx_canvas *c, int usec);
+void qom_putframe(qom *qm, gfx_canvas *c, double usec);
 void qom_putframenow(qom *qm, gfx_canvas *c);
-gfx_canvas *qom_getframe(qom *qm, int n, int *usec);
-int qom_getduration(qom *qm);
+gfx_canvas *qom_getframe(qom *qm, int n, double *usec);
+double qom_getduration(qom *qm);
 int qom_close(qom *qm);
 
 int qom_getnframes(qom *qm);
@@ -213,12 +225,12 @@ int qom_geterror(qom *qm);
 void qom_setoutputencoding(qom *qm, int encoding);
 int qom_getoutputencoding(qom *qm);
 
-void qom_setstarttimer(qom *qm, int starttime);
+void qom_setstarttime(qom *qm, double starttime);
 void qom_setstartdir(qom *qm, int dir);
 void qom_setleftbounce(qom *qm, int bounce);
 void qom_setrightbounce(qom *qm, int bounce);
 
-int qom_getstarttime(qom *qm);
+double qom_getstartusec(qom *qm);
 int qom_getstartdir(qom *qm);
 int qom_getleftbounce(qom *qm);
 int qom_getrightbounce(qom *qm);
@@ -238,9 +250,10 @@ Implementation */
 #include "math.h"
 #include <sys/time.h>
 
-#define oldoldQOM_MAGIC (0x54FE)
-#define oldQOM_MAGIC (0x54FF)
-#define QOM_MAGIC (0x5501)
+#define oQOM_MAGIC (0x54FF)
+#define ooQOM_MAGIC (0x54FE)
+#define oooQOM_MAGIC (0x5501)
+#define QOM_MAGIC (0x5301)
 
 /* support for canvas data structure */
 
@@ -272,13 +285,17 @@ void gfx_canvas_free(gfx_canvas *c)
 
 /* internal utilities */
 
-static unsigned int _qom_getusec(void)
+static int _qom_startsec = 0;
+
+static double _qom_getusec(void)
 {
     struct timeval tv;
     struct timezone tz;
     gettimeofday(&tv, &tz);
     int sec = (int)tv.tv_sec;
-    return (1000000*sec)+tv.tv_usec;
+    if(_qom_startsec == 0)
+	_qom_startsec = sec;
+    return (1000000*(sec-_qom_startsec))+tv.tv_usec;
 }
 
 static int _qom_writeframe_LITERAL(qom *qm, gfx_canvas *c) {
@@ -459,10 +476,12 @@ static void _qom_readheader(qom *qm)
 {
     qm->header.magic = _qom_readint(qm);    
     qm->header.nframes = _qom_readint(qm);
-    qm->header.duration = _qom_readint(qm);
+    qm->header.duration_lo = _qom_readint(qm);
+    qm->header.duration_hi = _qom_readint(qm);
     qm->header.sizex = _qom_readint(qm);
     qm->header.sizey = _qom_readint(qm);
-    qm->header.default_starttime = _qom_readint(qm);    
+    qm->header.default_starttime_lo = _qom_readint(qm);    
+    qm->header.default_starttime_hi = _qom_readint(qm);    
     qm->header.default_startdir = _qom_readint(qm);     
     qm->header.default_leftbounce = _qom_readint(qm);   
     qm->header.default_rightbounce = _qom_readint(qm);   
@@ -473,10 +492,12 @@ static void _qom_writeheader(qom *qm)
     qm->header.magic = QOM_MAGIC;
     _qom_writeint(qm, qm->header.magic);
     _qom_writeint(qm, qm->header.nframes);
-    _qom_writeint(qm, qm->header.duration);
+    _qom_writeint(qm, qm->header.duration_lo);
+    _qom_writeint(qm, qm->header.duration_hi);
     _qom_writeint(qm, qm->header.sizex);
     _qom_writeint(qm, qm->header.sizey);
-    _qom_writeint(qm, qm->header.default_starttime);
+    _qom_writeint(qm, qm->header.default_starttime_lo);
+    _qom_writeint(qm, qm->header.default_starttime_hi);
     _qom_writeint(qm, qm->header.default_startdir);
     _qom_writeint(qm, qm->header.default_leftbounce);
     _qom_writeint(qm, qm->header.default_rightbounce);
@@ -501,12 +522,14 @@ static void _qom_readframeinfo(qom *qm)
     qm->framealloc = qm->header.nframes;
     qom_frameinfo *fi = qm->frames;
     for(int i=0; i<qm->header.nframes; i++) {
-        fi->time = _qom_readint(qm);    
+        fi->time_lo = _qom_readint(qm);    
+        fi->time_hi = _qom_readint(qm);    
         fi->encoding = _qom_readint(qm);    
         fi->sizex = _qom_readint(qm);    
         fi->sizey = _qom_readint(qm);    
         fi->offset = _qom_readint(qm);    
         fi->size = _qom_readint(qm);    
+        fi->encoding_usec = _qom_readint(qm);    
         fi++;
     }
 }
@@ -515,12 +538,14 @@ static void _qom_writeframeinfo(qom *qm)
 {
     qom_frameinfo *fi = qm->frames;
     for(int i=0; i<qm->header.nframes; i++) {
-        _qom_writeint(qm, fi->time);
+        _qom_writeint(qm, fi->time_lo);
+        _qom_writeint(qm, fi->time_hi);
         _qom_writeint(qm, fi->encoding);
         _qom_writeint(qm, fi->sizex);
         _qom_writeint(qm, fi->sizey);
         _qom_writeint(qm, fi->offset);
         _qom_writeint(qm, fi->size);
+        _qom_writeint(qm, fi->encoding_usec);
         fi++;
     }
 }
@@ -550,17 +575,19 @@ qom *qom_open(const char *filename, const char *mode)
     qom *qm = (qom *)malloc(sizeof(qom));
     qm->header.magic = 0;
     qm->header.nframes = 0;
-    qm->header.duration = 0;
+    qm->header.duration_lo = 0;
+    qm->header.duration_hi = 0;
     qm->header.sizex = -1;
     qm->header.sizey = -1;
-    qm->header.default_starttime = 0;  
+    qm->header.default_starttime_lo = 0;  
+    qm->header.default_starttime_hi = 0;  
     qm->header.default_startdir = qomSTART_DIR_INC;
     qm->header.default_leftbounce = qomBOUNCE_REV;
     qm->header.default_rightbounce = qomBOUNCE_REV;
     qm->mode = qomMODE_NONE;
     qm->f = 0;
     qm->error = qomERROR_NONE;
-    qm->starttime = 0;
+    qm->firstframe_usec = 0;
     qm->frames = 0;
     qm->framealloc = 0;
     qm->output_encoding = qomENCODING_QOI;
@@ -592,7 +619,26 @@ int qom_getnframes(qom *qm)
     return qm->header.nframes;
 }
 
-gfx_canvas *qom_getframe(qom *qm, int n, int *usec) 
+double gfx_64ToUsec(unsigned int lo, unsigned int hi)
+{
+    double dlo = lo;
+    double dhi = hi;
+    double dscale = 256*256;
+    dscale = dscale*dscale;
+    return ((dhi*dscale) + lo);
+}
+
+void gfx_UsecTo64(double t, unsigned int *lo, unsigned int *hi)
+{
+    double dscale = 256*256;
+    dscale = dscale*dscale;
+    double dhi = floor(t/dscale);
+    double dlo = t-(dhi*dscale);
+    *hi = dhi;
+    *lo = dlo;
+}
+
+gfx_canvas *qom_getframe(qom *qm, int n, double *usec) 
 {
     if((qm->mode == qomMODE_R) || (qm->mode == qomMODE_RW)) {
         qom_frameinfo *info = _qom_getframeinfo(qm, n);
@@ -600,7 +646,7 @@ gfx_canvas *qom_getframe(qom *qm, int n, int *usec)
 	fseek(qm->f, info->offset, SEEK_SET);
 	int input_encoding = _qom_readint(qm);
 	int imgdatasize = info->size-4;
-	*usec = info->time;
+	*usec = gfx_64ToUsec(info->time_lo, info->time_hi);
 	switch(input_encoding) {
 	    case qomENCODING_LITERAL:
 		return _qom_readframe_LITERAL(qm, imgdatasize);
@@ -622,22 +668,22 @@ gfx_canvas *qom_getframe(qom *qm, int n, int *usec)
     }
 }
 
-int qom_getduration(qom *qm) 
+double qom_getduration(qom *qm) 
 {
-    return qm->header.duration;
+    return gfx_64ToUsec(qm->header.duration_lo, qm->header.duration_hi);
 }
 
-void qom_putframe(qom *qm, gfx_canvas *c, int usec) 
+void qom_putframe(qom *qm, gfx_canvas *c, double usec) 
 {
     if((qm->mode == qomMODE_W) || (qm->mode == qomMODE_RW)) {
-        int curframetime;
         if(qom_getnframes(qm) == 0) {
             qm->header.sizex = c->sizex;
             qm->header.sizey = c->sizey;
             qm->offset = sizeof(qom_header);
-            qm->starttime = usec;
+            qm->firstframe_usec = usec;
         }
-	curframetime = usec-qm->starttime;
+	double curframe_usec = usec-qm->firstframe_usec;
+	double startput_usec = _qom_getusec();
 	int size;
 	switch(qm->output_encoding) {
 	    case qomENCODING_LITERAL:
@@ -661,16 +707,19 @@ void qom_putframe(qom *qm, gfx_canvas *c, int usec)
 		qm->error = qomERROR_FORMAT;
 	       	return;
 	}
-        qom_frameinfo info;
-        info.time = curframetime;
-        info.encoding = qm->output_encoding;
-        info.sizex = c->sizex;
-        info.sizey = c->sizey;
-        info.offset = qm->offset;
-        info.size = size;
-        _qom_addframeinfo(qm, &info, qm->header.nframes);
+
+        qom_frameinfo fi;
+	gfx_UsecTo64(curframe_usec, &fi.time_lo, &fi.time_hi);
+        fi.encoding = qm->output_encoding;
+        fi.sizex = c->sizex;
+        fi.sizey = c->sizey;
+        fi.offset = qm->offset;
+        fi.size = size;
+        fi.encoding_usec = _qom_getusec()-startput_usec;
+        _qom_addframeinfo(qm, &fi, qm->header.nframes);
+
+	gfx_UsecTo64(curframe_usec, &qm->header.duration_lo, &qm->header.duration_hi);
         qm->header.nframes++;
-        qm->header.duration = curframetime;
         qm->offset += size;
     } else {
         fprintf(stderr, "qom: can't put a frame while reading a movie\n");
@@ -703,21 +752,25 @@ void qom_print(qom *qm, const char *label) {
     fprintf(stderr, "qom %s:\n", label);
     fprintf(stderr, "    Size: %d x %d (of first frame)\n", qm->header.sizex, qm->header.sizey);
     fprintf(stderr, "    N frames: %d\n", qom_getnframes(qm));
-    fprintf(stderr, "    Duration: %f sec\n", qm->header.duration/(1000.0*1000.0));
+    fprintf(stderr, "    Duration: %f sec\n", gfx_64ToUsec(qm->header.duration_lo, qm->header.duration_hi)/(1000.0*1000.0));
     for(int n=0; n<qom_getnframes(qm); n++) {
         qom_frameinfo *info = _qom_getframeinfo(qm, n);
-        fprintf(stderr, "    %s frame: %d  size: %dx%d  time: %d  offset %d  size %d\n", qom_encodingname(info->encoding), n, info->sizex, info->sizey, info->time, info->offset, info->size);
+	double time = gfx_64ToUsec(info->time_lo, info->time_hi);
+        fprintf(stderr, "    %s frame: %d  size: %dx%d  time: %f  offset %d  size %d\n", qom_encodingname(info->encoding), n, info->sizex, info->sizey, time, info->offset, info->size);
     }
+    int totencode_usec = 0;
     int totpixels = 0;
     int totdata = 0;
     for(int i=0; i<qom_getnframes(qm); i++) {
         qom_frameinfo *fi = _qom_getframeinfo(qm, i);
         totpixels += fi->sizex*fi->sizey;
         totdata += fi->size;
+	totencode_usec += fi->encoding_usec;
     }
     float totMpix = totpixels/(1024.0*1024.0);
     fprintf(stderr, "Summary\n");
     fprintf(stderr, "    %d frames  %f Mega pixels\n", qom_getnframes(qm), totMpix);
+    fprintf(stderr, "    %f total encode time\n", totencode_usec/(1000.0*1000.0));
     fprintf(stderr, "    %d compressed bytes  %d expanded bytes\n", totdata, totpixels*4);
     fprintf(stderr, "    %f compression ratio\n", totdata/(totpixels*4.0));
     fprintf(stderr, "\n");
@@ -756,9 +809,9 @@ int qom_getoutputencoding(qom *qm)
 }
 
 
-void qom_setstarttime(qom *qm, int starttime)
+void qom_setstartusec(qom *qm, double startusec)
 {
-    qm->header.default_starttime = starttime;
+    gfx_UsecTo64(startusec, &qm->header.default_starttime_lo, &qm->header.default_starttime_hi);
 }
 
 void qom_setstartdir(qom *qm, int dir)
@@ -777,9 +830,9 @@ void qom_setrightbounce(qom *qm, int bounce)
 }
 
 
-int qom_getstarttime(qom *qm)
+double qom_getstartusec(qom *qm)
 {
-    return qm->header.default_starttime;
+    return gfx_64ToUsec(qm->header.default_starttime_lo, qm->header.default_starttime_hi);
 }
 
 int qom_getstartdir(qom *qm)
@@ -807,20 +860,20 @@ void qom_readbenchmark(const char *filename)
     int totpixels = 0;
     int totdata = 0;
     for(int i=0; i<nframes; i++) {
-        int usec;
+        double usec;
         gfx_canvas *c = qom_getframe(qm, i, &usec);
         gfx_canvas_free(c);
         qom_frameinfo *fi = _qom_getframeinfo(qm, i);
         totpixels += fi->sizex*fi->sizey;
         totdata += fi->size;
     }
-    int totusec = _qom_getusec()-t0;
+    int tot_usec = _qom_getusec()-t0;
     float totMpix = totpixels/(1024.0*1024.0);
     fprintf(stderr, "Benchmark reading %s:\n", filename);
     fprintf(stderr, "    %d frames  %f Mega pixels\n", nframes, totMpix);
     fprintf(stderr, "    %d compressed bytes  %d expanded bytes\n", totdata, totpixels*4);
     fprintf(stderr, "    %f compression ratio\n", totdata/(totpixels*4.0));
-    fprintf(stderr, "    %d usec total time  %f usec per Mpix  %f Mpix per sec\n", totusec, totusec/totMpix, 1000.0*1000.0*(totMpix/totusec));
+    fprintf(stderr, "    %d usec total time  %f usec per Mpix  %f Mpix per sec\n", tot_usec, tot_usec/totMpix, 1000.0*1000.0*(totMpix/tot_usec));
     qom_close(qm);
 }
 

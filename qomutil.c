@@ -47,7 +47,7 @@ void qom_trim(qom *qm_in, qom *qm_out, int frame0, int frame1)
     }
     for(int frameno = 0; frameno<nframes; frameno++) {
         if((frameno>=frame0) && (frameno<=frame1)) {
-            int usec;
+            double usec;
             gfx_canvas *c = qom_getframe(qm_in, frameno, &usec);
             qom_putframe(qm_out, c, usec);
             gfx_canvas_free(c);
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
             exit(1);
         for(int frameno = 0; frameno<qom_getnframes(qm); frameno++) {
             char outfname[1024];
-            int usec;
+            double usec;
             gfx_canvas *c = qom_getframe(qm, frameno, &usec);
             sprintf(outfname, "%s%04d.png", argv[3], frameno);
             canvas_topng(c, outfname);
