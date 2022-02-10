@@ -135,31 +135,31 @@ Implementation */
 
 /* utils */
 
-#define SHIFT_R         (0)
-#define SHIFT_G         (8)
-#define SHIFT_B         (16)
-#define SHIFT_A         (24)
+#define gfx_SHIFT_R         (0)
+#define gfx_SHIFT_G         (8)
+#define gfx_SHIFT_B         (16)
+#define gfx_SHIFT_A         (24)
 
-#define RVAL(l)                 ((int)(((l)>>SHIFT_R)&0xff))
-#define GVAL(l)                 ((int)(((l)>>SHIFT_G)&0xff))
-#define BVAL(l)                 ((int)(((l)>>SHIFT_B)&0xff))
-#define AVAL(l)                 ((int)(((l)>>SHIFT_A)&0xff))
+#define gfx_RVAL(l)                 ((int)(((l)>>gfx_SHIFT_R)&0xff))
+#define gfx_GVAL(l)                 ((int)(((l)>>gfx_SHIFT_G)&0xff))
+#define gfx_BVAL(l)                 ((int)(((l)>>gfx_SHIFT_B)&0xff))
+#define gfx_AVAL(l)                 ((int)(((l)>>gfx_SHIFT_A)&0xff))
 
-#define CPACK(r,g,b,a)  (((r)<<SHIFT_R) | ((g)<<SHIFT_G) | ((b)<<SHIFT_B) | ((a)<<SHIFT_A))
+#define gfx_CPACK(r,g,b,a)  (((r)<<gfx_SHIFT_R) | ((g)<<gfx_SHIFT_G) | ((b)<<gfx_SHIFT_B) | ((a)<<gfx_SHIFT_A))
 
-#define RLUM            (0.224)
-#define GLUM            (0.697)
-#define BLUM            (0.079)
+#define gfx_RLUM            (0.224)
+#define gfx_GLUM            (0.697)
+#define gfx_BLUM            (0.079)
 
-#define RINTLUM         (57)
-#define GINTLUM         (179)
-#define BINTLUM         (20)
+#define gfx_RINTLUM         (57)
+#define gfx_GINTLUM         (179)
+#define gfx_BINTLUM         (20)
 
-#define ILUM(r,g,b)     ((int)(RINTLUM*(r)+GINTLUM*(g)+BINTLUM*(b))>>8)
-#define LUM(r,g,b)      (RLUM*(r)+GLUM*(g)+BLUM*(b))
+#define gfx_ILUM(r,g,b)     ((int)(gfx_RINTLUM*(r)+gfx_GINTLUM*(g)+gfx_BINTLUM*(b))>>8)
+#define gfx_LUM(r,g,b)      (gfx_RLUM*(r)+gfx_GLUM*(g)+gfx_BLUM*(b))
 
-#define DEFGAMMA        (2.2)
-#define DEFINVGAMMA     (1.0/2.2)
+#define gfx_DEFGAMMA        (2.2)
+#define gfx_DEFINVGAMMA     (1.0/2.2)
 
 float gfx_flerp(float f0, float f1, float p)
 {
@@ -312,19 +312,19 @@ void gfx_canvas_mix(gfx_canvas *dst, gfx_canvas *src, float factor)
         }
     } else if((ia>0) && (ia<255)) {
         while(n--) {
-            *dptr = CPACK(gfx_ilerp(RVAL(dptr[0]), a0, RVAL(sptr[0]), a1), 
-                          gfx_ilerp(GVAL(dptr[0]), a0, GVAL(sptr[0]), a1), 
-                          gfx_ilerp(BVAL(dptr[0]), a0, BVAL(sptr[0]), a1), 
-                          gfx_ilerp(AVAL(dptr[0]), a0, AVAL(sptr[0]), a1)); 
+            *dptr = gfx_CPACK(gfx_ilerp(gfx_RVAL(dptr[0]), a0, gfx_RVAL(sptr[0]), a1), 
+                          gfx_ilerp(gfx_GVAL(dptr[0]), a0, gfx_GVAL(sptr[0]), a1), 
+                          gfx_ilerp(gfx_BVAL(dptr[0]), a0, gfx_BVAL(sptr[0]), a1), 
+                          gfx_ilerp(gfx_AVAL(dptr[0]), a0, gfx_AVAL(sptr[0]), a1)); 
             dptr++;
             sptr++;
         }
     } else {
         while(n--) {
-            *dptr = CPACK(gfx_ilerplimit(RVAL(dptr[0]), a0, RVAL(sptr[0]), a1), 
-                          gfx_ilerplimit(GVAL(dptr[0]), a0, GVAL(sptr[0]), a1), 
-                          gfx_ilerplimit(BVAL(dptr[0]), a0, BVAL(sptr[0]), a1), 
-                          gfx_ilerplimit(AVAL(dptr[0]), a0, AVAL(sptr[0]), a1));
+            *dptr = gfx_CPACK(gfx_ilerplimit(gfx_RVAL(dptr[0]), a0, gfx_RVAL(sptr[0]), a1), 
+                          gfx_ilerplimit(gfx_GVAL(dptr[0]), a0, gfx_GVAL(sptr[0]), a1), 
+                          gfx_ilerplimit(gfx_BVAL(dptr[0]), a0, gfx_BVAL(sptr[0]), a1), 
+                          gfx_ilerplimit(gfx_AVAL(dptr[0]), a0, gfx_AVAL(sptr[0]), a1));
             dptr++;
             sptr++;
         }
@@ -356,30 +356,30 @@ void gfx_canvas_saturate(gfx_canvas *in, float sat)
     int a0 = 256-a1;
     if(is == 0) {
         while(n--) {
-            int r = RVAL(*lptr);
-            int g = GVAL(*lptr);
-            int b = BVAL(*lptr);
-            int a = AVAL(*lptr);
-            int lum = ILUM(r, g, b);
-            *lptr++ = CPACK(lum, lum, lum, a);
+            int r = gfx_RVAL(*lptr);
+            int g = gfx_GVAL(*lptr);
+            int b = gfx_BVAL(*lptr);
+            int a = gfx_AVAL(*lptr);
+            int lum = gfx_ILUM(r, g, b);
+            *lptr++ = gfx_CPACK(lum, lum, lum, a);
         }
     } else if((sat>0.0 && sat<1.0)) {
         while(n--) {
-            int r = RVAL(*lptr);
-            int g = GVAL(*lptr);
-            int b = BVAL(*lptr);
-            int a = AVAL(*lptr);
-            int lum = ILUM(r, g, b);
-            *lptr++ = CPACK(gfx_ilerp(lum, a0, r, a1), gfx_ilerp(lum, a0, g, a1), gfx_ilerp(lum, a0, b, a1), a);
+            int r = gfx_RVAL(*lptr);
+            int g = gfx_GVAL(*lptr);
+            int b = gfx_BVAL(*lptr);
+            int a = gfx_AVAL(*lptr);
+            int lum = gfx_ILUM(r, g, b);
+            *lptr++ = gfx_CPACK(gfx_ilerp(lum, a0, r, a1), gfx_ilerp(lum, a0, g, a1), gfx_ilerp(lum, a0, b, a1), a);
         }
     } else {
         while(n--) {
-            int r = RVAL(*lptr);
-            int g = GVAL(*lptr);
-            int b = BVAL(*lptr);
-            int a = AVAL(*lptr);
-            int lum = ILUM(r, g, b);
-            *lptr++ = CPACK(gfx_ilerplimit(lum, a0, r, a1), gfx_ilerplimit(lum, a0, g, a1), gfx_ilerplimit(lum, a0, b, a1), a);
+            int r = gfx_RVAL(*lptr);
+            int g = gfx_GVAL(*lptr);
+            int b = gfx_BVAL(*lptr);
+            int a = gfx_AVAL(*lptr);
+            int lum = gfx_ILUM(r, g, b);
+            *lptr++ = gfx_CPACK(gfx_ilerplimit(lum, a0, r, a1), gfx_ilerplimit(lum, a0, g, a1), gfx_ilerplimit(lum, a0, b, a1), a);
         }
     }
 }
@@ -400,11 +400,11 @@ void gfx_canvas_gammawarp(gfx_canvas *in, float gamma)
     unsigned int *dptr = in->data;
     int n = in->sizex*in->sizey;
     while(n--) {
-        int r = round(255.0*pow(RVAL(*dptr)/255.0, gamma));
-        int g = round(255.0*pow(GVAL(*dptr)/255.0, gamma));
-        int b = round(255.0*pow(BVAL(*dptr)/255.0, gamma));
-        int a = AVAL(*dptr);
-        *dptr++ = CPACK(r, g, b, a);
+        int r = round(255.0*pow(gfx_RVAL(*dptr)/255.0, gamma));
+        int g = round(255.0*pow(gfx_GVAL(*dptr)/255.0, gamma));
+        int b = round(255.0*pow(gfx_BVAL(*dptr)/255.0, gamma));
+        int a = gfx_AVAL(*dptr);
+        *dptr++ = gfx_CPACK(r, g, b, a);
     }
 }
 
@@ -426,14 +426,14 @@ gfx_canvas *gfx_canvas_maxrgb(gfx_canvas *in)
     unsigned int *optr = out->data;
     int n = in->sizex*in->sizey;
     while(n--) {
-        int r = RVAL(*iptr);
-        int g = GVAL(*iptr);
-        int b = BVAL(*iptr);
-        int a = AVAL(*iptr);
+        int r = gfx_RVAL(*iptr);
+        int g = gfx_GVAL(*iptr);
+        int b = gfx_BVAL(*iptr);
+        int a = gfx_AVAL(*iptr);
         int max = r;
         if(max < g) max = g;
         if(max < b) max = b;
-        *optr = CPACK(max, max, max, a);
+        *optr = gfx_CPACK(max, max, max, a);
         iptr++;
         optr++;
     }
@@ -450,11 +450,11 @@ gfx_canvas *gfx_canvas_brighten(gfx_canvas *in, gfx_canvas *maxrgbblur, float pa
     unsigned int *optr = out->data;
     int n = in->sizex*in->sizey;
     while(n--) {
-        float illum = RVAL(*bptr)/255.0;
-        int r = RVAL(*iptr);
-        int g = GVAL(*iptr);
-        int b = BVAL(*iptr);
-        int a = AVAL(*iptr);
+        float illum = gfx_RVAL(*bptr)/255.0;
+        int r = gfx_RVAL(*iptr);
+        int g = gfx_GVAL(*iptr);
+        int b = gfx_BVAL(*iptr);
+        int a = gfx_AVAL(*iptr);
         if(illum < illummin)
             illum = illummin;
         if(illum < illummax) {
@@ -467,7 +467,7 @@ gfx_canvas *gfx_canvas_brighten(gfx_canvas *in, gfx_canvas *maxrgbblur, float pa
             b = scale*b;
             if(b>255) b = 255;
         }
-        *optr = CPACK(r, g, b, a);
+        *optr = gfx_CPACK(r, g, b, a);
         iptr++;
         bptr++;
         optr++;
@@ -497,7 +497,7 @@ void gfx_canvas_apply_tab(gfx_canvas *in, unsigned char *tab)
     unsigned int *lptr = in->data;
     int n = in->sizex*in->sizey;
     while(n) {
-        *lptr = CPACK(tab[RVAL(lptr[0])], tab[GVAL(lptr[0])], tab[BVAL(lptr[0])], AVAL(lptr[0]));
+        *lptr = gfx_CPACK(tab[gfx_RVAL(lptr[0])], tab[gfx_GVAL(lptr[0])], tab[gfx_BVAL(lptr[0])], gfx_AVAL(lptr[0]));
         lptr++;
         n--;
     }
@@ -531,23 +531,23 @@ typedef struct gfx_hist {
     int maxbright;
 } gfx_hist;
 
-#define CHAN_R          (1)
-#define CHAN_G          (2)
-#define CHAN_B          (3)
-#define CHAN_A          (4)
-#define CHAN_RGB        (6)
+#define gfx_CHAN_R          (1)
+#define gfx_CHAN_G          (2)
+#define gfx_CHAN_B          (3)
+#define gfx_CHAN_A          (4)
+#define gfx_CHAN_RGB        (6)
 
-#define EPSILON (0.00000000000000000001)
-#define RERRWGT 0.25
-#define GERRWGT 0.50
-#define BERRWGT 0.25
+#define gfx_EPSILON (0.00000000000000000001)
+#define gfx_RERRWGT 0.25
+#define gfx_GERRWGT 0.50
+#define gfx_BERRWGT 0.25
 
-#define mybzero(a,b)      memset((a),0,(b))
+#define gfx_mybzero(a,b)      memset((a),0,(b))
 
 void gfx_histclear(gfx_hist *h)
 {
-    mybzero(h->count, 256*sizeof(double));
-    mybzero(h->dist, 256*sizeof(double));
+    gfx_mybzero(h->count, 256*sizeof(double));
+    gfx_mybzero(h->dist, 256*sizeof(double));
     h->mean = 0.0;
     h->median = 0.0;
     h->stddev = 0.0;
@@ -631,29 +631,29 @@ gfx_hist *gfx_canvas_hist(gfx_canvas *c, int chan)
     double *cptr = h->count;
     double one = 1.0;
     switch(chan) {
-        case CHAN_R:
+        case gfx_CHAN_R:
             while(n--) {
-                cptr[RVAL(*lptr)] += one;
+                cptr[gfx_RVAL(*lptr)] += one;
                 lptr++;
             }
             break;
-        case CHAN_G:
+        case gfx_CHAN_G:
             while(n--) {
-                cptr[GVAL(*lptr)] += one;
+                cptr[gfx_GVAL(*lptr)] += one;
                 lptr++;
             }
             break;
-        case CHAN_B:
+        case gfx_CHAN_B:
             while(n--) {
-                cptr[BVAL(*lptr)] += one;
+                cptr[gfx_BVAL(*lptr)] += one;
                 lptr++;
             }
             break;
-        case CHAN_RGB:
+        case gfx_CHAN_RGB:
             while(n--) {
-                cptr[RVAL(*lptr)] += one;
-                cptr[GVAL(*lptr)] += one;
-                cptr[BVAL(*lptr)] += one;
+                cptr[gfx_RVAL(*lptr)] += one;
+                cptr[gfx_GVAL(*lptr)] += one;
+                cptr[gfx_BVAL(*lptr)] += one;
                 lptr++;
             }
     }
@@ -661,9 +661,9 @@ gfx_hist *gfx_canvas_hist(gfx_canvas *c, int chan)
     return h;
 }
 
-#define DELPOW3(del)    ((del)*(del)*(del))
-#define DELPOW2(del)    ((del)*(del))
-#define DELPOW1(del)    (del)
+#define gfx_DELPOW3(del)    ((del)*(del)*(del))
+#define gfx_DELPOW2(del)    ((del)*(del))
+#define gfx_DELPOW1(del)    (del)
 
 double clamperr(gfx_hist *h, int pos, int end)
 {
@@ -674,12 +674,12 @@ double clamperr(gfx_hist *h, int pos, int end)
     if(end == 0) {
         for(i=pos-1; i>=0; i--) {
            del = (pos-i)/255.0;
-           err += DELPOW2(del)*h->count[i];
+           err += gfx_DELPOW2(del)*h->count[i];
         }
     } else {
         for(i=pos+1; i<=255; i++) {
            del = (i-pos)/255.0;
-           err += DELPOW2(del)*h->count[i];
+           err += gfx_DELPOW2(del)*h->count[i];
         }
     }
     return pow(err/h->total, 1.0/2.0);
@@ -694,22 +694,22 @@ void getminmax(gfx_hist *hr, gfx_hist *hg, gfx_hist *hb, float min, float max, i
     gfx_histcalc(hg);
     gfx_histcalc(hb);
     thresh = min;
-    if(thresh<EPSILON) {
+    if(thresh<gfx_EPSILON) {
         *imin = 0;
     } else {
         for(i=1; i<256; i++) {
-            err = (RERRWGT*clamperr(hr, i, 0)) + (GERRWGT*clamperr(hg, i, 0)) + (BERRWGT*clamperr(hb, i, 0));
+            err = (gfx_RERRWGT*clamperr(hr, i, 0)) + (gfx_GERRWGT*clamperr(hg, i, 0)) + (gfx_BERRWGT*clamperr(hb, i, 0));
             if(err>thresh)
                 break;
         }
         *imin = i-1;
     }
     thresh = 1.0-max;
-    if(thresh<EPSILON) {
+    if(thresh<gfx_EPSILON) {
         *imax = 255;
     } else {
         for(i=254; i>=0; i--) {
-            err = (RERRWGT*clamperr(hr, i, 1)) + (GERRWGT*clamperr(hg, i, 1)) + (BERRWGT*clamperr(hb, i, 1));
+            err = (gfx_RERRWGT*clamperr(hr, i, 1)) + (gfx_GERRWGT*clamperr(hg, i, 1)) + (gfx_BERRWGT*clamperr(hb, i, 1));
             if(err>thresh)
                 break;
         }
@@ -721,9 +721,9 @@ void gfx_canvas_perhistvals(gfx_canvas *c, float min, float max, float *emin, fl
 {
     int imin, imax;
 
-    gfx_hist *hr = gfx_canvas_hist(c, CHAN_R);
-    gfx_hist *hg = gfx_canvas_hist(c, CHAN_G);
-    gfx_hist *hb = gfx_canvas_hist(c, CHAN_B);
+    gfx_hist *hr = gfx_canvas_hist(c, gfx_CHAN_R);
+    gfx_hist *hg = gfx_canvas_hist(c, gfx_CHAN_G);
+    gfx_hist *hb = gfx_canvas_hist(c, gfx_CHAN_B);
     getminmax(hr, hg, hb, min, max, &imin, &imax);
     gfx_histfree(hr);
     gfx_histfree(hg);
@@ -764,10 +764,10 @@ void gfx_canvas_scalergba(gfx_canvas *in, float scaler, float scaleg, float scal
     unsigned int *dptr = in->data;
     int n = in->sizex*in->sizey;
     while(n--) {
-        int r = round(RVAL(*dptr)*scaler);
-        int g = round(GVAL(*dptr)*scaleg);
-        int b = round(BVAL(*dptr)*scaleb);
-        int a = round(AVAL(*dptr)*scaleb);
+        int r = round(gfx_RVAL(*dptr)*scaler);
+        int g = round(gfx_GVAL(*dptr)*scaleg);
+        int b = round(gfx_BVAL(*dptr)*scaleb);
+        int a = round(gfx_AVAL(*dptr)*scaleb);
         if(r>255) r = 255;
         if(g>255) g = 255;
         if(b>255) b = 255;
@@ -776,13 +776,13 @@ void gfx_canvas_scalergba(gfx_canvas *in, float scaler, float scaleg, float scal
         if(g<0) g = 0;
         if(b<0) b = 0;
         if(a<0) a = 0;
-        *dptr++ = CPACK(r, g, b, a);
+        *dptr++ = gfx_CPACK(r, g, b, a);
     }
 }
 
 /* chromablur */
 
-void noblack(int *r, int *g, int *b)
+void gfx_noblack(int *r, int *g, int *b)
 {
     int i = *r;
     if(*g>i) i = *g;
@@ -803,24 +803,24 @@ void gfx_canvas_noblack(gfx_canvas *c)
     unsigned int *lptr = c->data;
     int n = c->sizex*c->sizey;
     while(n--) {
-        int r = RVAL(*lptr);
-        int g = GVAL(*lptr);
-        int b = BVAL(*lptr);
-        int a = BVAL(*lptr);
-        noblack(&r, &g, &b);
-        *lptr++ = CPACK(r, g, b, a);
+        int r = gfx_RVAL(*lptr);
+        int g = gfx_GVAL(*lptr);
+        int b = gfx_BVAL(*lptr);
+        int a = gfx_AVAL(*lptr);
+        gfx_noblack(&r, &g, &b);
+        *lptr++ = gfx_CPACK(r, g, b, a);
     }
 }
 
-#define LINSTEPS        (16*256)
-#define GAMSTEPS        (256)
+#define gfx_LINSTEPS        (16*256)
+#define gfx_GAMSTEPS        (256)
 
-static unsigned char *TOGAMTAB;
-static short *RLUMTAB;
-static short *GLUMTAB;
-static short *BLUMTAB;
+static unsigned char *gfx_TOGAMTAB;
+static short *gfx_RLUMTAB;
+static short *gfx_GLUMTAB;
+static short *gfx_BLUMTAB;
 
-#define ILUMLIN(r,g,b)          (TOGAMTAB[RLUMTAB[(r)]+GLUMTAB[(g)]+BLUMTAB[(b)]])
+#define gfx_ILUMLIN(r,g,b)          (gfx_TOGAMTAB[gfx_RLUMTAB[(r)]+gfx_GLUMTAB[(g)]+gfx_BLUMTAB[(b)]])
 
 void gfx_canvas_setlum(gfx_canvas *c, gfx_canvas *l)
 {
@@ -828,35 +828,35 @@ void gfx_canvas_setlum(gfx_canvas *c, gfx_canvas *l)
 
     if(!gfx_canvas_sizecheck(c, l))
         return;
-    if(!TOGAMTAB) {
-        TOGAMTAB = (unsigned char *)malloc(LINSTEPS*sizeof(char));
-        for(int i=0; i<LINSTEPS; i++)
-            TOGAMTAB[i] = round(255.0*pow(i/(LINSTEPS-1.0), DEFINVGAMMA));
-        RLUMTAB = (short *)malloc(GAMSTEPS*sizeof(short));
-        sc = (LINSTEPS-1.0)*RLUM;
-        for(int i=0; i<GAMSTEPS; i++)
-            RLUMTAB[i] = round(sc*pow(i/(GAMSTEPS-1.0), DEFGAMMA));
-        GLUMTAB = (short *)malloc(GAMSTEPS*sizeof(short));
-        sc = (LINSTEPS-1.0)*GLUM;
-        for(int i=0; i<GAMSTEPS; i++)
-            GLUMTAB[i] = round(sc*pow(i/(GAMSTEPS-1.0), DEFGAMMA));
-        BLUMTAB = (short *)malloc(GAMSTEPS*sizeof(short));
-        sc = (LINSTEPS-1.0)*BLUM;
-        for(int i=0; i<GAMSTEPS; i++)
-            BLUMTAB[i] = round(sc*pow(i/(GAMSTEPS-1.0), DEFGAMMA));
+    if(!gfx_TOGAMTAB) {
+        gfx_TOGAMTAB = (unsigned char *)malloc(gfx_LINSTEPS*sizeof(char));
+        for(int i=0; i<gfx_LINSTEPS; i++)
+            gfx_TOGAMTAB[i] = round(255.0*pow(i/(gfx_LINSTEPS-1.0), gfx_DEFINVGAMMA));
+        gfx_RLUMTAB = (short *)malloc(gfx_GAMSTEPS*sizeof(short));
+        sc = (gfx_LINSTEPS-1.0)*gfx_RLUM;
+        for(int i=0; i<gfx_GAMSTEPS; i++)
+            gfx_RLUMTAB[i] = round(sc*pow(i/(gfx_GAMSTEPS-1.0), gfx_DEFGAMMA));
+        gfx_GLUMTAB = (short *)malloc(gfx_GAMSTEPS*sizeof(short));
+        sc = (gfx_LINSTEPS-1.0)*gfx_GLUM;
+        for(int i=0; i<gfx_GAMSTEPS; i++)
+            gfx_GLUMTAB[i] = round(sc*pow(i/(gfx_GAMSTEPS-1.0), gfx_DEFGAMMA));
+        gfx_BLUMTAB = (short *)malloc(gfx_GAMSTEPS*sizeof(short));
+        sc = (gfx_LINSTEPS-1.0)*gfx_BLUM;
+        for(int i=0; i<gfx_GAMSTEPS; i++)
+            gfx_BLUMTAB[i] = round(sc*pow(i/(gfx_GAMSTEPS-1.0), gfx_DEFGAMMA));
     }
 
     unsigned int *cptr = c->data;
     unsigned int *lptr = l->data;
     int n = c->sizex*c->sizey;
     while(n--) {
-        int r = RVAL(*cptr);
-        int g = GVAL(*cptr);
-        int b = BVAL(*cptr);
-        int a = BVAL(*cptr);
-        noblack(&r, &g, &b);
-        int lum = ILUMLIN(r, g, b);
-        int wantlum = RVAL(*lptr++);
+        int r = gfx_RVAL(*cptr);
+        int g = gfx_GVAL(*cptr);
+        int b = gfx_BVAL(*cptr);
+        int a = gfx_AVAL(*cptr);
+        gfx_noblack(&r, &g, &b);
+        int lum = gfx_ILUMLIN(r, g, b);
+        int wantlum = gfx_RVAL(*lptr++);
         if(wantlum<=lum) {
             if(lum>0) {
                 r = (r * wantlum)/lum;
@@ -875,7 +875,7 @@ void gfx_canvas_setlum(gfx_canvas *c, gfx_canvas *l)
             g = (g*colorness + whiteness)/div;
             b = (b*colorness + whiteness)/div;
         }
-        *cptr++ = CPACK(r, g, b, a);
+        *cptr++ = gfx_CPACK(r, g, b, a);
     }
 }
 
@@ -998,7 +998,7 @@ float gfx_RectDist(gfx_Rect r, float posx, float posy, float exp)
     return pow(pow(dx, exp)+pow(dy, exp), 1.0/exp);
 }
 
-#define XY_POS_PTR(c, x, y) ((c)->data+(((y)*c->sizex)+(x)))
+#define gfx_XY_POS_PTR(c, x, y) ((c)->data+(((y)*c->sizex)+(x)))
 
 void gfx_canvas_setrect(gfx_canvas *c, gfx_Rect rect, float r, float g, float b, float a) 
 {
@@ -1007,9 +1007,9 @@ void gfx_canvas_setrect(gfx_canvas *c, gfx_Rect rect, float r, float g, float b,
     int ig = g*255.0;
     int ib = b*255.0;
     int ia = a*255.0;
-    unsigned int color = CPACK(ir, ig, ib, ia);
+    unsigned int color = gfx_CPACK(ir, ig, ib, ia);
     for(int y=0; y<rect.sizey; y++) {
-        dptr = XY_POS_PTR(c, rect.originx, rect.originy+y);
+        dptr = gfx_XY_POS_PTR(c, rect.originx, rect.originy+y);
         for(int x=0; x<rect.sizex; x++)
             *dptr++ = color;
     }
@@ -1028,8 +1028,8 @@ void gfx_canvas_copy_offset(gfx_canvas *scan, gfx_canvas *dcan, int offsetx, int
     unsigned int *sptr = scan->data;
     unsigned int *dptr = dcan->data;
     for(int y=0; y<scan->sizey; y++) {
-        dptr = XY_POS_PTR(dcan, offsetx, offsety+y);
-        sptr = XY_POS_PTR(scan, 0, y);
+        dptr = gfx_XY_POS_PTR(dcan, offsetx, offsety+y);
+        sptr = gfx_XY_POS_PTR(scan, 0, y);
         for(int x=0; x<scan->sizex; x++)
             *dptr++ = *sptr++;
     }
@@ -1065,11 +1065,11 @@ void gfx_canvas_roundcorners(gfx_canvas *in, float radius, float exp)
             float alpha = radius-dist;
             if(alpha > 1.0) alpha = 1.0;
             if(alpha < 0.0) alpha = 0.0;
-            int r = alpha*RVAL(*dptr);
-            int g = alpha*GVAL(*dptr);
-            int b = alpha*BVAL(*dptr);
-            int a = alpha*AVAL(*dptr);
-            *dptr++ = CPACK(r, g, b, a);
+            int r = alpha*gfx_RVAL(*dptr);
+            int g = alpha*gfx_GVAL(*dptr);
+            int b = alpha*gfx_BVAL(*dptr);
+            int a = alpha*gfx_AVAL(*dptr);
+            *dptr++ = gfx_CPACK(r, g, b, a);
         }
     }
 }
@@ -1114,11 +1114,11 @@ void gfx_canvas_softedge(gfx_canvas *c, float width)
     for(int y=0; y<sizey; y++) {
         for(int x=0; x<sizex; x++) {
             float alpha = wx[x] * wy[y];
-            int r = alpha*RVAL(*dptr);
-            int g = alpha*GVAL(*dptr);
-            int b = alpha*BVAL(*dptr);
-            int a = alpha*AVAL(*dptr);
-            *dptr++ = CPACK(r, g, b, a);
+            int r = alpha*gfx_RVAL(*dptr);
+            int g = alpha*gfx_GVAL(*dptr);
+            int b = alpha*gfx_BVAL(*dptr);
+            int a = alpha*gfx_AVAL(*dptr);
+            *dptr++ = gfx_CPACK(r, g, b, a);
         }
     }
     free(wx);

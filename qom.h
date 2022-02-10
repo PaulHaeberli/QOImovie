@@ -176,10 +176,10 @@ typedef struct qom_frameinfo {
 #define QIOM_HEADER_SIZE        (sizeof(qom_header))
 #define QIOM_FRAME_SIZE         (sizeof(qom_frame))
 
-#define MODE_NONE	(0)
-#define MODE_R		(1)
-#define MODE_W		(2)
-#define MODE_RW		(3)
+#define qomMODE_NONE		(0)
+#define qomMODE_R		(1)
+#define qomMODE_W		(2)
+#define qomMODE_RW		(3)
 
 typedef struct qom {
     qom_header header;
@@ -485,7 +485,7 @@ static void _qom_writeheader(qom *qm)
 static int _qom_openwrite(qom *qm, const char *filename) 
 {
     qm->f = fopen(filename, "wb");
-    qm->mode = MODE_W;
+    qm->mode = qomMODE_W;
     if(!qm->f) {
         fprintf(stderr, "qom: can't open output file [%s]\n", filename);
         qm->error = qomERROR_OPEN_WRITE;
@@ -528,7 +528,7 @@ static void _qom_writeframeinfo(qom *qm)
 static int _qom_openread(qom *qm, const char *filename) 
 {
     qm->f = fopen(filename, "rb");
-    qm->mode = MODE_R;
+    qm->mode = qomMODE_R;
     if(!qm->f) {
         fprintf(stderr, "qom: can't open input file [%s]\n", filename);
         qm->error = qomERROR_OPEN_READ;
@@ -557,7 +557,7 @@ qom *qom_open(const char *filename, const char *mode)
     qm->header.default_startdir = qomSTART_DIR_INC;
     qm->header.default_leftbounce = qomBOUNCE_REV;
     qm->header.default_rightbounce = qomBOUNCE_REV;
-    qm->mode = MODE_NONE;
+    qm->mode = qomMODE_NONE;
     qm->f = 0;
     qm->error = qomERROR_NONE;
     qm->starttime = 0;
@@ -594,7 +594,7 @@ int qom_getnframes(qom *qm)
 
 gfx_canvas *qom_getframe(qom *qm, int n, int *usec) 
 {
-    if((qm->mode == MODE_R) || (qm->mode == MODE_RW)) {
+    if((qm->mode == qomMODE_R) || (qm->mode == qomMODE_RW)) {
         qom_frameinfo *info = _qom_getframeinfo(qm, n);
 
 	fseek(qm->f, info->offset, SEEK_SET);
@@ -629,7 +629,7 @@ int qom_getduration(qom *qm)
 
 void qom_putframe(qom *qm, gfx_canvas *c, int usec) 
 {
-    if((qm->mode == MODE_W) || (qm->mode == MODE_RW)) {
+    if((qm->mode == qomMODE_W) || (qm->mode == qomMODE_RW)) {
         int curframetime;
         if(qom_getnframes(qm) == 0) {
             qm->header.sizex = c->sizex;
@@ -726,7 +726,7 @@ void qom_print(qom *qm, const char *label) {
 int qom_close(qom *qm) 
 {
     if(qm->f) {
-	if((qm->mode == MODE_W) || (qm->mode == MODE_RW)) {
+	if((qm->mode == qomMODE_W) || (qm->mode == qomMODE_RW)) {
 	    _qom_writeframeinfo(qm);
 	    fseek(qm->f, 0, SEEK_SET);
 	    _qom_writeheader(qm);
