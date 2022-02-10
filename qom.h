@@ -600,7 +600,7 @@ gfx_canvas *qom_getframe(qom *qm, int n, int *usec)
 	fseek(qm->f, info->offset, SEEK_SET);
 	int input_encoding = _qom_readint(qm);
 	int imgdatasize = info->size-4;
-
+	*usec = info->time;
 	switch(input_encoding) {
 	    case qomENCODING_LITERAL:
 		return _qom_readframe_LITERAL(qm, imgdatasize);
@@ -615,7 +615,6 @@ gfx_canvas *qom_getframe(qom *qm, int n, int *usec)
 		qm->error = qomERROR_FORMAT;
 		return 0;
 	}
-	*usec = info->time;
     } else {
         fprintf(stderr, "qom: can't getframe from movie being written\n");
         qm->error = qomERROR_GETFRAME_WHILE_WRITE;
@@ -639,7 +638,7 @@ void qom_putframe(qom *qm, gfx_canvas *c, int usec)
             qm->starttime = usec;
             curframetime = 0;
         }
-	curframetime = usec-qm->starttime;
+	curframetime = usec;
 	int size;
 	switch(qm->output_encoding) {
 	    case qomENCODING_LITERAL:
