@@ -29,6 +29,7 @@ SOFTWARE.
 #include "stdio.h"
 #include "stdlib.h"
 #include "math.h"
+#include "string.h"
 #include <sys/time.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

@@ -119,6 +119,9 @@ void gfx_canvas_roundcorners(gfx_canvas *in, float radius, float exp) ;
 
 void gfx_canvas_softedge(gfx_canvas *c, float width);
 
+void gfx_canvas_set_aspect(gfx_canvas *c, float aspect);
+
+float gfx_smoothstep(float x, float min, float max);
 
 #ifdef __cplusplus
 }
@@ -1073,7 +1076,7 @@ void gfx_canvas_roundcorners(gfx_canvas *in, float radius, float exp)
 
 /* softedge */
 
-static float gfx_smoothstep(float x, float min, float max) 
+float gfx_smoothstep(float x, float min, float max) 
 {
     if (x <= min) return 0;
     if (x >= max) return 1;

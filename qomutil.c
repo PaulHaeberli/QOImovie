@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "math.h"
 #include "unistd.h"
+#include "string.h"
 #include <sys/time.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -14,7 +15,7 @@
 
 // support for reading and writing png images for testing
 
-gfx_canvas *gfx_canvas_frompng(const char *filename)
+gfx_canvas *canvas_frompng(const char *filename)
 {
     int sizex, sizey, n;
     unsigned char *data = stbi_load(filename, &sizex, &sizey, &n, 0);
@@ -25,7 +26,7 @@ gfx_canvas *gfx_canvas_frompng(const char *filename)
     return gfx_canvas_new_withdata(sizex, sizey, data);
 }
 
-void gfx_canvas_topng(gfx_canvas *in, const char *filename)
+void canvas_topng(gfx_canvas *in, const char *filename)
 {
     stbi_write_png(filename, in->sizex, in->sizey, 4, in->data, 4*in->sizex);
 }
@@ -87,7 +88,7 @@ int main(int argc, char **argv)
         if(!qm)
             exit(1);
         for(int argp = 2; argp<argc-1; argp++) {
-            gfx_canvas *c = gfx_canvas_frompng(argv[argp]);
+            gfx_canvas *c = canvas_frompng(argv[argp]);
             qom_putframe(qm, c, usec);
             gfx_canvas_free(c);
             usec += DEFAULT_FRAMETIME;
@@ -102,7 +103,7 @@ int main(int argc, char **argv)
             int usec;
             gfx_canvas *c = qom_getframe(qm, frameno, &usec);
             sprintf(outfname, "%s%04d.png", argv[3], frameno);
-            gfx_canvas_topng(c, outfname);
+            canvas_topng(c, outfname);
             gfx_canvas_free(c);
         }
         qom_close(qm);
