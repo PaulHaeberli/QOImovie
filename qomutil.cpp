@@ -182,7 +182,7 @@ int main(int argc, char **argv)
     class QOIm movie;
     if(argc<3) {
         fprintf(stderr, "\nusage: qomutil -toqom 00.png 01.png 02.png test.qom\n\n");
-        fprintf(stderr, "usage: qomutil -topng test.qom outfamily\n\n");
+        fprintf(stderr, "usage: qomutil -topng test.qom tmp/OUT%%04d.png\n\n");
         fprintf(stderr, "usage: qomutil -print test.qom\n\n");
         exit(1);
     }
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
             char outfname[1024];
             int usec;
             gfx_canvas *c = movie.getframe(frameno, &usec);
-            sprintf(outfname, "%s%03d.png", argv[3], frameno);
+	    sprintf(outfname, argv[3], frameno);
             gfx_canvas_topng(c, outfname);
             gfx_canvas_free(c);
         }

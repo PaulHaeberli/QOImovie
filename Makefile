@@ -19,7 +19,7 @@ clean:
 
 test:
 	./qomutil -toqom testimages/* tmp/out.qom
-	./qomutil -topng tmp/out.qom tmp/TEST
+	./qomutil -topng tmp/out.qom tmp/TEST%04d.png
 	./qomutil -print tmp/out.qom
 	./qomutil -benchmark tmp/out.qom
 

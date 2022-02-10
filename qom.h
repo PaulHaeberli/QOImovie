@@ -150,10 +150,15 @@ typedef struct qom_frameinfo {
 #define QIOM_HEADER_SIZE        (sizeof(qom_header))
 #define QIOM_FRAME_SIZE         (sizeof(qom_frame))
 
+#define MODE_NONE	(0)
+#define MODE_R		(1)
+#define MODE_W		(2)
+#define MODE_RW		(3)
+
 typedef struct qom {
     qom_header header;
-    FILE *outf;
-    FILE *inf;
+    int mode;
+    FILE *f;
     int error;
     int offset;
     int starttime;
@@ -320,9 +325,10 @@ static void _qom_writeint(qom *qm, int val)
 {
     int p = 0;
     qom_write_32((unsigned char *)&val, &p, val);
-    int bytes_write = fwrite(&val, 1, sizeof(int), qm->outf);
+    int bytes_write = fwrite(&val, 1, sizeof(int), qm->f);
     if(bytes_write != sizeof(int)) {
         fprintf(stderr, "qom: _qom_writeint error\n");
+	exit(1);
         qm->error = 1;
         return;
     }
@@ -331,9 +337,10 @@ static void _qom_writeint(qom *qm, int val)
 static int _qom_readint(qom *qm) 
 {
     int val;
-    int bytes_read = fread(&val, 1, sizeof(int), qm->inf);
+    int bytes_read = fread(&val, 1, sizeof(int), qm->f);
     if(bytes_read != sizeof(int)) {
         fprintf(stderr, "qom: _qom_readint error\n");
+	exit(1);
         qm->error = 1;
         return 0;
     }
@@ -380,8 +387,9 @@ static void _qom_writeheader(qom *qm)
 
 static int _qom_openwrite(qom *qm, const char *filename) 
 {
-    qm->outf = fopen(filename, "wb");
-    if(!qm->outf) {
+    qm->f = fopen(filename, "wb");
+    qm->mode = MODE_W;
+    if(!qm->f) {
         fprintf(stderr, "qom: can't open output file [%s]\n", filename);
         qm->error = 1;
         return 0;
@@ -421,8 +429,9 @@ static void _qom_writeframeinfo(qom *qm)
 
 static int _qom_openread(qom *qm, const char *filename) 
 {
-    qm->inf = fopen(filename, "rb");
-    if(!qm->inf) {
+    qm->f = fopen(filename, "rb");
+    qm->mode = MODE_R;
+    if(!qm->f) {
         fprintf(stderr, "qom: can't open input file [%s]\n", filename);
         qm->error = 1;
         return 0;
@@ -433,7 +442,7 @@ static int _qom_openread(qom *qm, const char *filename)
         qm->error = 1;
         return 0;
     }
-    fseek(qm->inf, -(qm->header.nframes*sizeof(qom_frameinfo)), SEEK_END);
+    fseek(qm->f, -(qm->header.nframes*sizeof(qom_frameinfo)), SEEK_END);
     _qom_readframeinfo(qm);
     return 1;
 }
@@ -450,8 +459,8 @@ qom *qom_open(const char *filename, const char *mode)
     qm->header.default_startdir = START_DIR_INC;
     qm->header.default_leftbounce = BOUNCE_REV;
     qm->header.default_rightbounce = BOUNCE_REV;
-    qm->outf = 0;
-    qm->inf = 0;
+    qm->mode = MODE_NONE;
+    qm->f = 0;
     qm->error = 0;
     qm->starttime = 0;
     qm->frames = 0;
@@ -459,15 +468,15 @@ qom *qom_open(const char *filename, const char *mode)
 
     if(strcmp(mode, "r") == 0) {
         if(!_qom_openread(qm, filename)) {
-           if(qm->inf)
-               fclose(qm->inf);
+           if(qm->f)
+               fclose(qm->f);
             _qom_free(qm);
             return 0;
         }
     } else if(strcmp(mode, "w") == 0) {
         if(!_qom_openwrite(qm, filename)) {
-           if(qm->outf)
-               fclose(qm->outf);
+           if(qm->f)
+               fclose(qm->f);
             _qom_free(qm);
             return 0;
         }
@@ -486,11 +495,11 @@ int qom_getnframes(qom *qm)
 
 gfx_canvas *qom_getframe(qom *qm, int n, int *usec) 
 {
-    if(qm->inf) {
+    if((qm->mode == MODE_R) || (qm->mode == MODE_RW)) {
         qom_frameinfo *info = _qom_getframeinfo(qm, n);
-        return _qom_readframe(qm->inf, info->offset, info->size);
+        return _qom_readframe(qm->f, info->offset, info->size);
     } else {
-        fprintf(stderr, "qom: can not getframe from movie being written\n");
+        fprintf(stderr, "qom: can't getframe from movie being written\n");
         qm->error = 1;
         return 0;
     }
@@ -503,7 +512,7 @@ int qom_getduration(qom *qm)
 
 void qom_putframe(qom *qm, gfx_canvas *c, int usec) 
 {
-    if(qm->outf) {
+    if((qm->mode == MODE_W) || (qm->mode == MODE_RW)) {
         int curframetime;
         if(qom_getnframes(qm) == 0) {
             qm->header.sizex = c->sizex;
@@ -514,7 +523,7 @@ void qom_putframe(qom *qm, gfx_canvas *c, int usec)
         } else {
             curframetime = usec-qm->starttime;
         }
-        int size = _qom_writeframe(c, qm->outf);
+        int size = _qom_writeframe(c, qm->f);
         qom_frameinfo info;
         info.time = curframetime;
         info.sizex = c->sizex;
@@ -563,19 +572,59 @@ void qom_print(qom *qm, const char *label) {
 
 int qom_close(qom *qm) 
 {
-    if(qm->outf) {
-        _qom_writeframeinfo(qm);
-        fseek(qm->outf, 0, SEEK_SET);
-        _qom_writeheader(qm);
-        fclose(qm->outf);
-        qm->outf = 0;
-    } else {
-        fclose(qm->inf);
-        qm->inf = 0;
+    if(qm->f) {
+	if((qm->mode == MODE_W) || (qm->mode == MODE_RW)) {
+	    _qom_writeframeinfo(qm);
+	    fseek(qm->f, 0, SEEK_SET);
+	    _qom_writeheader(qm);
+   	}
+        fclose(qm->f);
+        qm->f = 0;
     }
     int error = qm->error;
     _qom_free(qm);
     return error;
+}
+
+void qom_setstarttime(qom *qm, int usec)
+{
+    qm->header.default_starttime = usec;
+}
+
+void qom_setstartdir(qom *qm, int dir)
+{
+    qm->header.default_startdir = dir;
+}
+
+void qom_setleftbounce(qom *qm, int bounce)
+{
+    qm->header.default_leftbounce = bounce;
+}
+
+void qom_setrightbounce(qom *qm, int bounce)
+{
+    qm->header.default_rightbounce = bounce;
+}
+
+
+int qom_getstarttime(qom *qm)
+{
+    return qm->header.default_starttime;
+}
+
+int qom_getstartdir(qom *qm)
+{
+    return qm->header.default_startdir;
+}
+
+int qom_getleftbounce(qom *qm)
+{
+    return qm->header.default_leftbounce;
+}
+
+int qom_getrightbounce(qom *qm)
+{
+    return qm->header.default_rightbounce;
 }
 
 void qom_readbenchmark(const char *filename) 
