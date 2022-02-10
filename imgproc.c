@@ -199,7 +199,7 @@ void doprocess(qom *qm, gfx_canvas *can_in, int argc, char **argv, int frameno, 
             int sizex = atoi(argv[i]);
             i++;
             int sizey = atoi(argv[i]);
-            gfx_filter(can_in, FILT_ZOOM, sizex, sizey, NOARG, NOARG, NOARG);
+            gfx_filter(can_in, FILT_ZOOMTOSIZE, sizex, sizey, NOARG, NOARG, NOARG);
         } else if(strcmp(argv[i],"saturate") == 0) {
             if((i+1) >= argc) { 
                 fprintf(stderr, "error: %s needs 1 argument!\n", argv[i]);
