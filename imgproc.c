@@ -63,9 +63,9 @@ SOFTWARE.
 #define FILT_MOVIE_FADEINOUT    (15)
 #define FILT_MOVIE_BLURINOUT    (16)
 
-#define FILT_MOVIE_ENCODE_LITERAL  	(17)
-#define FILT_MOVIE_ENCODE_QOI    	(18)
-#define FILT_MOVIE_ENCODE_PNG    	(19)
+#define FILT_MOVIE_ENCODE_LITERAL       (17)
+#define FILT_MOVIE_ENCODE_QOI           (18)
+#define FILT_MOVIE_ENCODE_PNG           (19)
 
 /* gfx_filter */
 
@@ -129,11 +129,11 @@ void gfx_filter(gfx_canvas *can_in, int filtmode, float arg1, float arg2, float 
 
 float gfx_eerp(float f0, float f1, float p) {
     if (f0==f1)
-	return f0;
+        return f0;
     if (p == 0.0)
-	return f0;
+        return f0;
     if (p == 1.0)
-	return f1;
+        return f1;
     return f0*pow(f1/f0, p);        // Faster  pow(f0, 1.0-p)*pow(f1, p) - Thanks for Tom Diff @TomDuff
 }
 
@@ -143,30 +143,30 @@ void gfx_movie_filter(qom *qm, gfx_canvas *can_in, int filtmode, float arg1, flo
     float p, param, diam;
     switch(filtmode) {
         case FILT_MOVIE_FADEINOUT:
-	    p = frameno+0.5;
-	    param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
-	    if(param<1.0)
-		gfx_canvas_scalergba(can_in, param, param, param, param);
+            p = frameno+0.5;
+            param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
+            if(param<1.0)
+                gfx_canvas_scalergba(can_in, param, param, param, param);
             break;
         case FILT_MOVIE_BLURINOUT:
-	    p = frameno+0.5;
-	    param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
-	    if(param<1.0) {
-		diam = gfx_canvas_diameter(can_in)*gfx_eerp(0.01, 1.0, param);
-		gfx_canvas *t = gfx_canvas_blur(can_in, diam);
-		gfx_canvas_swap(can_in, t);
-		gfx_canvas_free(t);
-		gfx_canvas_scalergba(can_in, param, param, param, param);
-	    }
+            p = frameno+0.5;
+            param = gfx_smoothstep(p, 0.0, arg1) * gfx_smoothstep(nframes-p, 0.0, arg1);
+            if(param<1.0) {
+                diam = gfx_canvas_diameter(can_in)*gfx_eerp(0.01, 1.0, param);
+                gfx_canvas *t = gfx_canvas_blur(can_in, diam);
+                gfx_canvas_swap(can_in, t);
+                gfx_canvas_free(t);
+                gfx_canvas_scalergba(can_in, param, param, param, param);
+            }
             break;
-	case FILT_MOVIE_ENCODE_LITERAL:
-	    qom_setoutputencoding(qm, qomENCODING_LITERAL);
+        case FILT_MOVIE_ENCODE_LITERAL:
+            qom_setoutputencoding(qm, qomENCODING_LITERAL);
             break;
-	case FILT_MOVIE_ENCODE_QOI:
-	    qom_setoutputencoding(qm, qomENCODING_QOI);
+        case FILT_MOVIE_ENCODE_QOI:
+            qom_setoutputencoding(qm, qomENCODING_QOI);
             break;
-	case FILT_MOVIE_ENCODE_PNG:
-	    qom_setoutputencoding(qm, qomENCODING_PNG);
+        case FILT_MOVIE_ENCODE_PNG:
+            qom_setoutputencoding(qm, qomENCODING_PNG);
             break;
     }
 }
@@ -430,9 +430,9 @@ int main(int argc, char **argv)
         fprintf(stderr,"for qom movie files this command can also be used:\n");
         fprintf(stderr,"\t[fadeinout aspect]        fadeinout nframes\n");
         fprintf(stderr,"\t[blurinout aspect]        blurinout nframes\n");
-        fprintf(stderr,"\t[qomLITERAL]        	    LITERAL\n");
-        fprintf(stderr,"\t[qomQOI]        	    QOI\n");
-        fprintf(stderr,"\t[qomPNG]        	    PNG\n");
+        fprintf(stderr,"\t[LITERAL]                 LITERAL\n");
+        fprintf(stderr,"\t[QOI]                     QOI\n");
+        fprintf(stderr,"\t[PNG]                     PNG\n");
         fprintf(stderr,"\n");
         fprintf(stderr,"ops can be chained like this:\n");
         fprintf(stderr,"\timgproc in.jpg out.jpg zoom 0.5 0.5 saturate 1.5 expand 0.1 0.9\n");

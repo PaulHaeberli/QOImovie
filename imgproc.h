@@ -963,15 +963,15 @@ gfx_Rect gfx_RectAspectInside(gfx_Rect r, float aspect)
 {
     float raspect = gfx_RectAspect(r);
     if(aspect>raspect) {
-	int sizey = round(r.sizex/aspect);
-	if(sizey==0) sizey++;
-	int orgy = (r.sizey-sizey)/2;
-	return gfx_RectMake(0, orgy, r.sizex, sizey);
+        int sizey = round(r.sizex/aspect);
+        if(sizey==0) sizey++;
+        int orgy = (r.sizey-sizey)/2;
+        return gfx_RectMake(0, orgy, r.sizex, sizey);
     } else {
-	int sizex = round(r.sizey*aspect);
-	if(sizex==0) sizex++;
-	int orgx = (r.sizex-sizex)/2;
-	return gfx_RectMake(orgx, 0, sizex, r.sizey);
+        int sizex = round(r.sizey*aspect);
+        if(sizex==0) sizex++;
+        int orgx = (r.sizex-sizex)/2;
+        return gfx_RectMake(orgx, 0, sizex, r.sizey);
     }
 }
 
@@ -1131,7 +1131,7 @@ void gfx_canvas_copyto(gfx_canvas *src, gfx_Rect sr, gfx_canvas *dst)
     assert(sr.sizey == dst->sizey);
     unsigned int *dptr = dst->data;
     for(int y=0; y<sr.sizey; y++) {
-	unsigned int *sptr = src->data + (src->sizex*(y+sr.originy) + sr.originx);
+        unsigned int *sptr = src->data + (src->sizex*(y+sr.originy) + sr.originx);
         for(int x=0; x<sr.sizex; x++)
             *dptr++ = *sptr++;
     }

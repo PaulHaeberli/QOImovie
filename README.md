@@ -23,7 +23,7 @@ read a movie
 
     qom *qm = qom_open( "out.qom", "r");
     for(int frameno = 0; frameno<qom_getnframes(qm); frameno++) {
-        int usec;
+        double usec;
         gfx_canvas *c = gfx_getframe(qm, frameno, &usec);
         gfx_canvas_free(c);
     }
